@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunset — Encontre o melhor pôr do sol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Karla:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fff9f2;
+    --paper-dim:#fbeee0;
+    --card:#ffffff;
+    --line:#ecdfcd;
+    --ink:#241631;
+    --ink-dim:#6b5c72;
+    --sun-core:#ffb347;
+    --sun-mid:#ff8c5a;
+    --sun-deep:#ff5d6c;
+    --pink-dusk:#e85d8a;
+    --dusk-700:#4a2b63;
+    --dusk-900:#1e1038;
+    --mono:'JetBrains Mono', monospace;
+    --display:'Fraunces', serif;
+    --body:'Karla', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--body);
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 5vw;
+    background:linear-gradient(to bottom, rgba(255,249,242,0.9), transparent);
+    backdrop-filter:blur(2px);
+  }
+  .logo{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:1.5rem;
+    letter-spacing:0.02em;
+    display:flex; align-items:center; gap:8px;
+    color:var(--ink);
+  }
+  .logo .dot{
+    width:10px; height:10px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--sun-core), var(--sun-deep));
+    box-shadow:0 0 12px rgba(255,140,90,0.5);
+  }
+  .nav-links{display:flex; gap:34px; font-size:0.95rem; font-weight:500;}
+  .nav-links a{opacity:0.75; transition:opacity 0.2s;}
+  .nav-links a:hover{opacity:1;}
+  .nav-cta{
+    background:var(--ink);
+    color:var(--paper);
+    padding:10px 20px;
+    border-radius:100px;
+    font-weight:700;
+    font-size:0.88rem;
+    transition:transform 0.2s ease;
+  }
+  .nav-cta:hover{transform:translateY(-2px);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    height:100vh;
+    min-height:640px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    background:linear-gradient(180deg,
+      #fef1de 0%,
+      #ffe0bd 22%,
+      #ffb98a 42%,
+      var(--sun-deep) 62%,
+      var(--sun-mid) 76%,
+      var(--sun-core) 88%,
+      #fff2d6 100%);
+    overflow:hidden;
+  }
+  .sun-disc{
+    position:absolute;
+    left:50%;
+    bottom:14%;
+    width:230px; height:230px;
+    transform:translateX(-50%);
+    border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #fffdf5, var(--sun-core) 45%, var(--sun-mid) 80%);
+    box-shadow:0 0 90px 20px rgba(255,140,90,0.45);
+    animation:pulse 6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 90px 20px rgba(255,140,90,0.45);}
+    50%{box-shadow:0 0 120px 30px rgba(255,140,90,0.65);}
+  }
+  .birds{
+    position:absolute; top:14%; left:0; right:0; height:20%;
+    opacity:0.35;
+  }
+  .horizon-hills{
+    position:absolute; bottom:0; left:0; right:0; height:16%;
+    background:var(--dusk-900);
+    opacity:0.9;
+    clip-path:polygon(0 40%, 12% 30%, 26% 45%, 40% 20%, 55% 38%, 68% 15%, 82% 34%, 100% 22%, 100% 100%, 0 100%);
+  }
+  .hero-content{
+    position:relative; z-index:5;
+    padding:0 5vw 64px;
+    max-width:900px;
+  }
+  .hero-eyebrow{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--dusk-900);
+    opacity:0.7;
+    margin-bottom:18px;
+  }
+  h1.hero-title{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(2.6rem, 6.5vw, 5.2rem);
+    line-height:0.98;
+    color:var(--dusk-900);
+    letter-spacing:-0.01em;
+    margin-bottom:22px;
+  }
+  h1.hero-title em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--paper);
+    -webkit-text-stroke:0.5px var(--dusk-900);
+  }
+  .hero-sub{
+    font-size:1.08rem;
+    color:var(--dusk-900);
+    opacity:0.78;
+    max-width:480px;
+    margin-bottom:34px;
+    line-height:1.5;
+  }
+  .search-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,0.95);
+    border-radius:100px;
+    padding:8px 8px 8px 22px;
+    max-width:560px;
+    box-shadow:0 12px 40px rgba(74,43,99,0.18);
+  }
+  .search-bar input{
+    flex:1; border:none; outline:none; background:transparent;
+    font-family:var(--body); font-size:0.98rem; color:var(--ink);
+  }
+  .search-bar input::placeholder{color:#a4948e;}
+  .search-btn{
+    background:var(--ink); color:var(--paper);
+    border:none; padding:12px 26px; border-radius:100px;
+    font-weight:700; font-size:0.9rem; cursor:pointer;
+    transition:background 0.2s;
+  }
+  .search-btn:hover{background:var(--dusk-700);}
+
+  /* ---------- SECTION SHARED ---------- */
+  section{padding:100px 5vw;}
+  .section-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom:48px; gap:24px; flex-wrap:wrap;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:0.76rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--sun-deep);
+    margin-bottom:10px;
+    display:block;
+  }
+  h2{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(1.9rem, 3.4vw, 2.8rem);
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  .section-note{
+    max-width:340px;
+    color:var(--ink-dim);
+    font-size:0.92rem;
+    line-height:1.5;
+  }
+
+  /* ---------- RANKING ---------- */
+  .ranking{background:var(--paper-dim);}
+  .rank-list{display:flex; flex-direction:column; gap:2px;}
+  .rank-item{
+    display:grid;
+    grid-template-columns:56px 90px 1fr auto;
+    align-items:center;
+    gap:24px;
+    padding:20px 18px;
+    border-radius:14px;
+    background:var(--card);
+    margin-bottom:10px;
+    box-shadow:0 2px 10px rgba(74,43,99,0.05);
+    transition:box-shadow 0.25s, transform 0.25s;
+  }
+  .rank-item:hover{box-shadow:0 8px 24px rgba(74,43,99,0.1); transform:translateY(-2px);}
+  .rank-num{
+    font-family:var(--mono);
+    font-size:1.3rem;
+    color:var(--sun-mid);
+    opacity:0.85;
+  }
+  .rank-item:nth-child(1) .rank-num{color:var(--sun-deep); opacity:1; font-size:1.6rem;}
+  .rank-thumb{
+    width:90px; height:64px; border-radius:10px;
+    background-size:cover; background-position:center;
+  }
+  .rank-info h3{
+    font-family:var(--display); font-weight:500; font-size:1.15rem; margin-bottom:4px; color:var(--ink);
+  }
+  .rank-info span{
+    font-family:var(--mono); font-size:0.76rem; color:var(--ink-dim);
+  }
+  .rank-score{
+    display:flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:0.9rem; color:var(--ink);
+  }
+  .rank-score svg{width:16px; height:16px;}
+
+  /* ---------- GALLERY ---------- */
+  .gallery{background:var(--paper);}
+  .tabs{display:flex; gap:8px; margin-bottom:36px;}
+  .tab{
+    padding:9px 20px; border-radius:100px; font-size:0.88rem; font-weight:600;
+    border:1px solid var(--line); cursor:pointer; transition:all 0.2s; color:var(--ink);
+  }
+  .tab.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .tab:not(.active):hover{border-color:var(--sun-mid);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    grid-auto-rows:180px;
+    gap:14px;
+  }
+  .card{
+    position:relative;
+    border-radius:16px;
+    overflow:hidden;
+    background-size:cover;
+    background-position:center;
+    cursor:pointer;
+    box-shadow:0 4px 16px rgba(74,43,99,0.08);
+  }
+  .card::after{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(to top, rgba(30,16,56,0.75) 0%, rgba(30,16,56,0.05) 45%, transparent 65%);
+  }
+  .card-big{grid-column:span 2; grid-row:span 2;}
+  .card-info{
+    position:absolute; bottom:0; left:0; right:0; z-index:2;
+    padding:16px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    color:#fff;
+  }
+  .card-loc{
+    font-family:var(--display); font-weight:500; font-size:1rem;
+  }
+  .card-loc small{
+    display:block; font-family:var(--mono); font-size:0.68rem; opacity:0.8; margin-top:2px; font-weight:400;
+  }
+  .card-stats{
+    display:flex; gap:10px; font-family:var(--mono); font-size:0.76rem;
+  }
+  .stat{display:flex; align-items:center; gap:4px;}
+  .heart-btn{
+    position:absolute; top:12px; right:12px; z-index:3;
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(255,255,255,0.85); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center;
+    border:none; cursor:pointer; transition:transform 0.15s;
+  }
+  .heart-btn:hover{transform:scale(1.1);}
+  .heart-btn svg{width:16px; height:16px; stroke:var(--ink); fill:none; transition:fill 0.2s, stroke 0.2s;}
+  .heart-btn.liked svg{fill:var(--sun-deep); stroke:var(--sun-deep);}
+
+  /* ---------- UPLOAD CTA ---------- */
+  .upload-cta{
+    background:linear-gradient(120deg, #ffe9d2, #ffd3c2);
+    border-radius:28px;
+    margin:0 5vw 100px;
+    padding:70px 6vw;
+    display:flex; justify-content:space-between; align-items:center; gap:40px;
+    flex-wrap:wrap;
+    position:relative;
+    overflow:hidden;
+  }
+  .upload-cta::before{
+    content:'';
+    position:absolute; right:-60px; top:-60px;
+    width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,157,90,0.4), transparent 70%);
+  }
+  .upload-text{max-width:480px; position:relative; z-index:2;}
+  .upload-text .eyebrow{color:var(--sun-deep);}
+  .upload-text h2{margin-bottom:14px; color:var(--ink);}
+  .upload-text p{color:var(--ink-dim); line-height:1.6;}
+  .upload-btn{
+    position:relative; z-index:2;
+    background:var(--ink);
+    color:var(--paper);
+    font-weight:700;
+    padding:16px 34px;
+    border-radius:100px;
+    border:none; cursor:pointer;
+    font-size:0.95rem;
+    white-space:nowrap;
+    transition:transform 0.2s;
+    display:flex; align-items:center; gap:10px;
+  }
+  .upload-btn:hover{transform:translateY(-2px);}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:40px 5vw 30px;
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid var(--line);
+    font-size:0.82rem; color:var(--ink-dim);
+    flex-wrap:wrap; gap:14px;
+  }
+
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .card-big{grid-column:span 2; grid-row:span 1;}
+    .nav-links{display:none;}
+    .rank-item{grid-template-columns:40px 70px 1fr; }
+    .rank-score{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span>Sunset</div>
+  <div class="nav-links">
+    <a href="#ranking">Rankings</a>
+    <a href="#gallery">Explorar</a>
+    <a href="#upload">Postar foto</a>
+  </div>
+  <a href="#upload" class="nav-cta">Entrar</a>
+</nav>
+
+<header class="hero">
+  <div class="sun-disc"></div>
+  <div class="horizon-hills"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">18.402 pôr do sol catalogados</span>
+    <h1 class="hero-title">Encontre o<br><em>melhor</em> lugar<br>pra ver o sol se pôr</h1>
+    <p class="hero-sub">Descubra os pontos de pôr do sol mais bem avaliados perto de você, veja fotos de quem já foi e compartilhe as suas.</p>
+    <form class="search-bar" onsubmit="return false;">
+      <input type="text" placeholder="Buscar por cidade, praia ou mirante...">
+      <button class="search-btn" type="submit">Buscar</button>
+    </form>
+  </div>
+</header>
+
+<section class="ranking" id="ranking">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Ranking da semana</span>
+      <h2>Os locais mais bem avaliados</h2>
+    </div>
+    <p class="section-note">Calculado com base nas curtidas e nas notas dadas pela comunidade nos últimos 7 dias.</p>
+  </div>
+  <div class="rank-list">
+    <div class="rank-item">
+      <span class="rank-num">01</span>
+      <div class="rank-thumb" style="background-image:linear-gradient(135deg,#ff8c5a,#e85d8a)"></div>
+      <div class="rank-info"><h3>Chapada dos Veadeiros, GO</h3><span>-14.1667, -47.5000 · 342 fotos</span></div>
+      <div class="rank-score">4.9 <svg viewBox="0 0 24 24" fill="none" stroke="#ff8c5a" stroke-width="2"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg></div>
+    </div>
+    <div class="rank-item">
+      <span class="rank-num">02</span>
+      <div class="rank-thumb" style="background-image:linear-gradient(135deg,#4a2b63,#ff5d6c)"></div>
+      <div class="rank-info"><h3>Jericoacoara, CE</h3><span>-2.7975, -40.5137 · 891 fotos</span></div>
+      <div class="rank-score">4.8 <svg viewBox="0 0 24 24" fill="none" stroke="#ff8c5a" stroke-width="2"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg></div>
+    </div>
+    <div class="rank-item">
+      <span class="rank-num">03</span>
+      <div class="rank-thumb" style="background-image:linear-gradient(135deg,#ffb347,#ff5d6c)"></div>
+      <div class="rank-info"><h3>Pôr do Sol da Barra, Salvador BA</h3><span>-13.0100, -38.5321 · 604 fotos</span></div>
+      <div class="rank-score">4.7 <svg viewBox="0 0 24 24" fill="none" stroke="#ff8c5a" stroke-width="2"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg></div>
+    </div>
+    <div class="rank-item">
+      <span class="rank-num">04</span>
+      <div class="rank-thumb" style="background-image:linear-gradient(135deg,#2d1b4e,#ff8c5a)"></div>
+      <div class="rank-info"><h3>Fernando de Noronha, PE</h3><span>-3.8536, -32.4297 · 1.2k fotos</span></div>
+      <div class="rank-score">4.7 <svg viewBox="0 0 24 24" fill="none" stroke="#ff8c5a" stroke-width="2"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="gallery">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Comunidade</span>
+      <h2>Fotos recentes</h2>
+    </div>
+    <div class="tabs">
+      <div class="tab active">Recentes</div>
+      <div class="tab">Mais curtidas</div>
+      <div class="tab">Perto de mim</div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card card-big" style="background-image:linear-gradient(160deg,#241631 0%,#4a2b63 30%,#ff5d6c 65%,#ffb347 100%)">
+      <button class="heart-btn liked" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      <div class="card-info">
+        <div class="card-loc">Chapada dos Veadeiros<small>São Jorge, GO</small></div>
+        <div class="card-stats"><span class="stat">❤ 428</span><span class="stat">💬 31</span></div>
+      </div>
+    </div>
+    <div class="card" style="background-image:linear-gradient(160deg,#2d1b4e,#ff8c5a)">
+      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      <div class="card-info">
+        <div class="card-loc">Jericoacoara<small>Ceará</small></div>
+        <div class="card-stats"><span class="stat">❤ 217</span></div>
+      </div>
+    </div>
+    <div class="card" style="background-image:linear-gradient(160deg,#1e1038,#e85d8a)">
+      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      <div class="card-info">
+        <div class="card-loc">Ibirapuera<small>São Paulo, SP</small></div>
+        <div class="card-stats"><span class="stat">❤ 96</span></div>
+      </div>
+    </div>
+    <div class="card" style="background-image:linear-gradient(160deg,#241631,#ff5d6c)">
+      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      <div class="card-info">
+        <div class="card-loc">Praia da Barra<small>Salvador, BA</small></div>
+        <div class="card-stats"><span class="stat">❤ 154</span></div>
+      </div>
+    </div>
+    <div class="card" style="background-image:linear-gradient(160deg,#4a2b63,#ffb347)">
+      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      <div class="card-info">
+        <div class="card-loc">Dunas do Jalapão<small>Tocantins</small></div>
+        <div class="card-stats"><span class="stat">❤ 88</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="upload-cta" id="upload">
+  <div class="upload-text">
+    <span class="eyebrow">Participe</span>
+    <h2>Tirou uma foto boa hoje?</h2>
+    <p>Poste sua foto, marque o local no mapa e deixe a comunidade avaliar. As fotos mais curtidas sobem no ranking do local.</p>
+  </div>
+  <button class="upload-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff9f2" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    Postar foto
+  </button>
+</section>
+
+<footer>
+  <div>Sunset · Encontre e compartilhe o melhor pôr do sol</div>
+  <div>Protótipo visual — v0.1 · Light mode</div>
+</footer>
+
+<script>
+function toggleLike(btn){
+  btn.classList.toggle('liked');
+}
+</script>
+</body>
+</html>

@@ -1,26 +1,58 @@
 @import "tailwindcss";
 
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --dusk-950: #150a26;
+  --dusk-900: #1e1038;
+  --dusk-800: #2d1b4e;
+  --dusk-700: #4a2b63;
+  --horizon-line: #ff9a5a;
+  --sun-core: #ffcf6b;
+  --sun-mid: #ff8c5a;
+  --sun-deep: #ff5d6c;
+  --pink-dusk: #e85d8a;
+  --cream: #fff6ec;
+  --cream-dim: #f5e9da;
+  --ink: #1a1024;
+
+  --paper: #fff9f2;
+  --paper-dim: #fbeee0;
+  --ink-dim: #6b5c72;
+  --card: #ffffff;
+  --line: #ecdfcd;
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --color-dusk-950: var(--dusk-950);
+  --color-dusk-900: var(--dusk-900);
+  --color-dusk-800: var(--dusk-800);
+  --color-dusk-700: var(--dusk-700);
+  --color-horizon-line: var(--horizon-line);
+  --color-sun-core: var(--sun-core);
+  --color-sun-mid: var(--sun-mid);
+  --color-sun-deep: var(--sun-deep);
+  --color-pink-dusk: var(--pink-dusk);
+  --color-cream: var(--cream);
+  --color-cream-dim: var(--cream-dim);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-ink-dim: var(--ink-dim);
+  --color-card: var(--card);
+  --color-line: var(--line);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+html {
+  scroll-behavior: smooth;
 }
