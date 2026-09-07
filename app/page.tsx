@@ -84,9 +84,7 @@ export default function HomePage() {
           <h1 className="mb-5.5 font-display text-[clamp(2.6rem,6.5vw,5.2rem)] leading-[0.98] tracking-[-0.01em] text-dusk-950">
             Encontre o
             <br />
-            <em className="text-white not-italic font-medium italic [-webkit-text-stroke:0.5px_var(--dusk-950)]">
-              melhor
-            </em>{" "}
+            <em className="text-white not-italic font-medium italic">melhor</em>{" "}
             lugar
             <br />
             pra ver o sol se pôr
