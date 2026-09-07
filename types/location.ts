@@ -4,5 +4,16 @@ export interface Location {
   latitude: number;
   longitude: number;
   city: string;
-  avg_rating: number;
+  avgRating: number;
+  createdAt: string;
+}
+
+export interface SunsetTime {
+  date: string;
+  tzId: string;
+  utcOffset: string;
+  sunrise: string;
+  sunset: string;
+  solarNoon: string;
+  dayLengthSeconds: number;
 }

@@ -4,10 +4,12 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
-import { register } from "@/lib/api/auth";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { ApiError } from "@/lib/api/client";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,10 +21,18 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     setError(null);
     try {
-      await register({ name, email, password });
-      router.push("/login");
-    } catch {
-      setError("Não foi possível criar a conta. Tente novamente.");
+      await register(name, email, password);
+      router.push("/");
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setError("Este e-mail já está cadastrado.");
+      } else if (err instanceof ApiError && err.fieldErrors) {
+        setError(Object.values(err.fieldErrors).flat().join(" "));
+      } else if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Não foi possível criar a conta. Tente novamente.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -56,6 +66,7 @@ export default function RegisterPage() {
           onChange={(event) => setPassword(event.target.value)}
           placeholder="Senha"
           required
+          minLength={8}
           className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
         />
         {error && <p className="text-sm text-sun-deep">{error}</p>}

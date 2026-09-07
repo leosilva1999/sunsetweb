@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { ApiError } from "@/lib/api/client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,8 +22,14 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push("/");
-    } catch {
-      setError("E-mail ou senha inválidos.");
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        setError("E-mail ou senha inválidos.");
+      } else if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Não foi possível entrar agora. Tente novamente.");
+      }
     } finally {
       setIsSubmitting(false);
     }

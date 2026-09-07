@@ -26,7 +26,8 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
 
   const photos = await apiFetch<CursorPage<Photo>>(`/users/${id}/photos`).catch(() => ({
     items: [] as Photo[],
-    next_cursor: null,
+    nextCursor: null,
+    hasMore: false,
   }));
 
   return (
@@ -38,7 +39,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
         <PhotoGrid
           items={photos.items.map((photo) => ({
             photo,
-            locationName: photo.location_id,
+            locationName: photo.locationName,
             city: "",
           }))}
         />

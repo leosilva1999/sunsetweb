@@ -9,7 +9,7 @@ import { createPhoto } from "@/lib/api/photos";
 
 export default function UploadPage() {
   const router = useRouter();
-  const { token, isAuthenticated } = useAuth();
+  const { isAuthenticated, getAccessToken } = useAuth();
   const [caption, setCaption] = useState("");
   const [locationId, setLocationId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,15 +17,19 @@ export default function UploadPage() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!token) return;
 
     setIsSubmitting(true);
     setError(null);
     try {
+      const token = await getAccessToken();
+      if (!token) {
+        setError("Sua sessão expirou. Entre novamente para publicar.");
+        return;
+      }
       // O fluxo real pede uma URL pré-assinada à API e sobe o arquivo direto pro
       // storage antes deste POST — endpoint da URL pré-assinada ainda não definido
       // na Sunset.API, então o upload do binário fica pendente aqui.
-      const photo = await createPhoto({ location_id: locationId, image_url: "", caption }, token);
+      const photo = await createPhoto({ locationId, imageUrl: "", caption: caption || null }, token);
       router.push(`/photos/${photo.id}`);
     } catch {
       setError("Não foi possível publicar a foto agora. Tente novamente.");

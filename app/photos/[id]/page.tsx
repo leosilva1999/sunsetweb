@@ -24,14 +24,14 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
   }
 
   const [location, comments] = await Promise.all([
-    getLocation(photo.location_id).catch(() => null),
-    getPhotoComments(id).catch(() => ({ items: [], next_cursor: null })),
+    getLocation(photo.locationId).catch(() => null),
+    getPhotoComments(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
   ]);
 
   return (
     <div className="grid grid-cols-1 gap-10 px-[5vw] py-32 lg:grid-cols-[1.4fr_1fr]">
-      <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-cover bg-center" style={{ backgroundImage: `url(${photo.image_url})` }}>
-        <LikeButton photoId={photo.id} initialCount={photo.likes_count} />
+      <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-cover bg-center" style={{ backgroundImage: `url(${photo.imageUrl})` }}>
+        <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
       </div>
 
       <div>

@@ -21,7 +21,7 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
 
   const [location, photos] = await Promise.all([
     getLocation(id).catch(() => null),
-    getLocationPhotos(id).catch(() => ({ items: [], next_cursor: null })),
+    getLocationPhotos(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
   ]);
 
   if (!location) {
@@ -35,7 +35,7 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
       </span>
       <h1 className="mb-4 font-display text-4xl font-semibold">{location.name}</h1>
       <div className="flex items-center gap-2 font-mono text-sm text-cream-dim light:text-ink">
-        {location.avg_rating.toFixed(1)}
+        {location.avgRating.toFixed(1)}
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--sun-core)" strokeWidth={2} className="h-4 w-4">
           <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
         </svg>

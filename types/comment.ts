@@ -1,6 +1,8 @@
 export interface Comment {
   id: string;
-  user_id: string;
-  photo_id: string;
+  userId: string;
+  userName: string;
+  userAvatarUrl: string | null;
   content: string;
+  createdAt: string;
 }

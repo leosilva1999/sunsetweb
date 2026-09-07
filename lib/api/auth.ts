@@ -1,41 +1,46 @@
 import { apiFetch } from "@/lib/api/client";
 import type { User } from "@/types/user";
 
-export interface AuthTokens {
-  access_token: string;
-  refresh_token: string;
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  user: User;
 }
 
 export function register(data: { name: string; email: string; password: string }) {
-  return apiFetch<AuthTokens>("/auth/register", {
+  return apiFetch<AuthResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
 export function login(data: { email: string; password: string }) {
-  return apiFetch<AuthTokens>("/auth/login", {
+  return apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
 export function refresh(refreshToken: string) {
-  return apiFetch<AuthTokens>("/auth/refresh", {
+  return apiFetch<AuthResponse>("/auth/refresh", {
     method: "POST",
-    body: JSON.stringify({ refresh_token: refreshToken }),
+    body: JSON.stringify({ refreshToken }),
   });
 }
 
-export function logout(token: string) {
-  return apiFetch<void>("/auth/logout", { method: "POST", token });
+export function logout(refreshToken: string) {
+  return apiFetch<void>("/auth/logout", {
+    method: "POST",
+    body: JSON.stringify({ refreshToken }),
+  });
 }
 
 export function getUser(id: string) {
   return apiFetch<User>(`/users/${id}`);
 }
 
-export function updateMe(data: Partial<Pick<User, "name" | "avatar_url">>, token: string) {
+export function updateMe(data: { name: string; avatarUrl: string | null }, token: string) {
   return apiFetch<User>("/users/me", {
     method: "PATCH",
     body: JSON.stringify(data),

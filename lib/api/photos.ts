@@ -3,17 +3,21 @@ import type { Photo } from "@/types/photo";
 import type { Comment } from "@/types/comment";
 import type { CursorPage } from "@/types/pagination";
 
-export function getPhotos(sort: "recent" | "top" = "recent", cursor?: string) {
-  const query = new URLSearchParams({ sort, ...(cursor ? { cursor } : {}) });
+export function getPhotos(sort: "recent" | "top" = "recent", cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    sort,
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
   return apiFetch<CursorPage<Photo>>(`/photos?${query}`);
 }
 
-export function getPhoto(id: string) {
-  return apiFetch<Photo>(`/photos/${id}`);
+export function getPhoto(id: string, token?: string | null) {
+  return apiFetch<Photo>(`/photos/${id}`, { token });
 }
 
 export function createPhoto(
-  data: Pick<Photo, "location_id" | "image_url" | "caption">,
+  data: { locationId: string; imageUrl: string; caption: string | null },
   token: string,
 ) {
   return apiFetch<Photo>("/photos", {
@@ -35,9 +39,13 @@ export function unlikePhoto(id: string, token: string) {
   return apiFetch<void>(`/photos/${id}/likes`, { method: "DELETE", token });
 }
 
-export function getPhotoComments(id: string, cursor?: string) {
-  const query = cursor ? `?cursor=${cursor}` : "";
-  return apiFetch<CursorPage<Comment>>(`/photos/${id}/comments${query}`);
+export function getPhotoComments(id: string, cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<CursorPage<Comment>>(`/photos/${id}/comments${suffix}`);
 }
 
 export function createComment(id: string, content: string, token: string) {

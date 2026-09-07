@@ -13,37 +13,55 @@ function gradient(colors: string[]) {
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
+const NOW = new Date().toISOString();
+
 const MOCK_RANKING: Location[] = [
-  { id: "1", name: "Chapada dos Veadeiros, GO", city: "São Jorge, GO", latitude: -14.1667, longitude: -47.5, avg_rating: 4.9 },
-  { id: "2", name: "Jericoacoara, CE", city: "Ceará", latitude: -2.7975, longitude: -40.5137, avg_rating: 4.8 },
-  { id: "3", name: "Pôr do Sol da Barra, Salvador BA", city: "Salvador, BA", latitude: -13.01, longitude: -38.5321, avg_rating: 4.7 },
-  { id: "4", name: "Fernando de Noronha, PE", city: "Pernambuco", latitude: -3.8536, longitude: -32.4297, avg_rating: 4.7 },
+  { id: "1", name: "Chapada dos Veadeiros, GO", city: "São Jorge, GO", latitude: -14.1667, longitude: -47.5, avgRating: 4.9, createdAt: NOW },
+  { id: "2", name: "Jericoacoara, CE", city: "Ceará", latitude: -2.7975, longitude: -40.5137, avgRating: 4.8, createdAt: NOW },
+  { id: "3", name: "Pôr do Sol da Barra, Salvador BA", city: "Salvador, BA", latitude: -13.01, longitude: -38.5321, avgRating: 4.7, createdAt: NOW },
+  { id: "4", name: "Fernando de Noronha, PE", city: "Pernambuco", latitude: -3.8536, longitude: -32.4297, avgRating: 4.7, createdAt: NOW },
 ];
+
+function mockPhoto(id: string, locationId: string, locationName: string, colors: string[], likesCount: number): PhotoGridItem["photo"] {
+  return {
+    id,
+    userId: "u1",
+    userName: "Sunset",
+    userAvatarUrl: null,
+    locationId,
+    locationName,
+    imageUrl: gradient(colors),
+    caption: null,
+    likesCount,
+    likedByCurrentUser: false,
+    createdAt: NOW,
+  };
+}
 
 const MOCK_GALLERY: PhotoGridItem[] = [
   {
-    photo: { id: "p1", user_id: "u1", location_id: "1", image_url: gradient(["#150a26", "#4a2b63", "#ff5d6c", "#ffcf6b"]), caption: null, likes_count: 428 },
+    photo: mockPhoto("p1", "1", "Chapada dos Veadeiros", ["#150a26", "#4a2b63", "#ff5d6c", "#ffcf6b"], 428),
     locationName: "Chapada dos Veadeiros",
     city: "São Jorge, GO",
     commentsCount: 31,
   },
   {
-    photo: { id: "p2", user_id: "u2", location_id: "2", image_url: gradient(["#2d1b4e", "#ff8c5a"]), caption: null, likes_count: 217 },
+    photo: mockPhoto("p2", "2", "Jericoacoara", ["#2d1b4e", "#ff8c5a"], 217),
     locationName: "Jericoacoara",
     city: "Ceará",
   },
   {
-    photo: { id: "p3", user_id: "u3", location_id: "5", image_url: gradient(["#1e1038", "#e85d8a"]), caption: null, likes_count: 96 },
+    photo: mockPhoto("p3", "5", "Ibirapuera", ["#1e1038", "#e85d8a"], 96),
     locationName: "Ibirapuera",
     city: "São Paulo, SP",
   },
   {
-    photo: { id: "p4", user_id: "u4", location_id: "3", image_url: gradient(["#150a26", "#ff5d6c"]), caption: null, likes_count: 154 },
+    photo: mockPhoto("p4", "3", "Praia da Barra", ["#150a26", "#ff5d6c"], 154),
     locationName: "Praia da Barra",
     city: "Salvador, BA",
   },
   {
-    photo: { id: "p5", user_id: "u5", location_id: "6", image_url: gradient(["#4a2b63", "#ffcf6b"]), caption: null, likes_count: 88 },
+    photo: mockPhoto("p5", "6", "Dunas do Jalapão", ["#4a2b63", "#ffcf6b"], 88),
     locationName: "Dunas do Jalapão",
     city: "Tocantins",
   },
