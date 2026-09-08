@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
+import { safeRedirectPath } from "@/lib/utils/safeRedirectPath";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +23,7 @@ export default function LoginPage() {
     setError(null);
     try {
       await login(email, password);
-      router.push("/");
+      router.push(safeRedirectPath(searchParams.get("redirect")));
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setError("E-mail ou senha inválidos.");
@@ -64,10 +66,25 @@ export default function LoginPage() {
       </form>
       <p className="mt-6 text-sm text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
         Não tem conta?{" "}
-        <Link href="/register" className="underline">
+        <Link
+          href={
+            searchParams.get("redirect")
+              ? `/register?redirect=${encodeURIComponent(searchParams.get("redirect")!)}`
+              : "/register"
+          }
+          className="underline"
+        >
           Cadastre-se
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

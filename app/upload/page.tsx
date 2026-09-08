@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import LocationMap from "@/components/location/LocationMap";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { createPhoto } from "@/lib/api/photos";
 
 export default function UploadPage() {
   const router = useRouter();
-  const { isAuthenticated, getAccessToken } = useAuth();
+  const isAuthenticated = useRequireAuth();
+  const { getAccessToken } = useAuth();
   const [caption, setCaption] = useState("");
   const [locationId, setLocationId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,14 +41,7 @@ export default function UploadPage() {
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="px-[5vw] py-32">
-        <h1 className="mb-4 font-display text-3xl font-semibold">Postar foto</h1>
-        <p className="text-sm text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
-          Você precisa entrar na sua conta para postar uma foto.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (

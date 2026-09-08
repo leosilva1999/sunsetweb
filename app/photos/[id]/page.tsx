@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getPhoto, getPhotoComments } from "@/lib/api/photos";
 import { getLocation } from "@/lib/api/locations";
 import LikeButton from "@/components/photo/LikeButton";
-import CommentList from "@/components/photo/CommentList";
+import Comments from "@/components/photo/Comments";
 
 export async function generateMetadata({ params }: PageProps<"/photos/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -46,7 +46,7 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
         {photo.caption && <p className="mb-8 text-cream-dim light:text-ink-dim">{photo.caption}</p>}
 
         <h2 className="mb-4 font-display text-lg font-semibold">Comentários</h2>
-        <CommentList comments={comments.items} />
+        <Comments photoId={photo.id} initialPage={comments} />
       </div>
     </div>
   );

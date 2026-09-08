@@ -263,31 +263,38 @@
   }
   .card{
     position:relative;
+    display:flex;
+    flex-direction:column;
     border-radius:16px;
     overflow:hidden;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .card-photo{
+    position:relative;
+    flex:1;
+    min-height:0;
     background-size:cover;
     background-position:center;
-    cursor:pointer;
-  }
-  .card::after{
-    content:'';
-    position:absolute; inset:0;
-    background:linear-gradient(to top, rgba(21,10,38,0.85) 0%, rgba(21,10,38,0.05) 45%, transparent 65%);
   }
   .card-big{grid-column:span 2; grid-row:span 2;}
   .card-info{
-    position:absolute; bottom:0; left:0; right:0; z-index:2;
-    padding:16px;
-    display:flex; justify-content:space-between; align-items:flex-end;
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    background:var(--dusk-900);
   }
   .card-loc{
-    font-family:var(--display); font-weight:500; font-size:1rem;
+    min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-family:var(--display); font-weight:500; font-size:0.92rem;
   }
   .card-loc small{
-    display:block; font-family:var(--mono); font-size:0.68rem; opacity:0.7; margin-top:2px; font-weight:400;
+    display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-family:var(--mono); font-size:0.65rem; opacity:0.7; margin-top:2px; font-weight:400;
   }
   .card-stats{
-    display:flex; gap:10px; font-family:var(--mono); font-size:0.76rem;
+    flex-shrink:0;
+    display:flex; gap:10px; font-family:var(--mono); font-size:0.72rem; opacity:0.85;
   }
   .stat{display:flex; align-items:center; gap:4px;}
   .stat svg{width:13px; height:13px;}
@@ -432,36 +439,46 @@
     </div>
   </div>
   <div class="grid">
-    <div class="card card-big" style="background-image:linear-gradient(160deg,#150a26 0%,#4a2b63 30%,#ff5d6c 65%,#ffcf6b 100%)">
-      <button class="heart-btn liked" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+    <div class="card card-big">
+      <div class="card-photo" style="background-image:linear-gradient(160deg,#150a26 0%,#4a2b63 30%,#ff5d6c 65%,#ffcf6b 100%)">
+        <button class="heart-btn liked" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      </div>
       <div class="card-info">
         <div class="card-loc">Chapada dos Veadeiros<small>São Jorge, GO</small></div>
         <div class="card-stats"><span class="stat">❤ 428</span><span class="stat">💬 31</span></div>
       </div>
     </div>
-    <div class="card" style="background-image:linear-gradient(160deg,#2d1b4e,#ff8c5a)">
-      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+    <div class="card">
+      <div class="card-photo" style="background-image:linear-gradient(160deg,#2d1b4e,#ff8c5a)">
+        <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      </div>
       <div class="card-info">
         <div class="card-loc">Jericoacoara<small>Ceará</small></div>
         <div class="card-stats"><span class="stat">❤ 217</span></div>
       </div>
     </div>
-    <div class="card" style="background-image:linear-gradient(160deg,#1e1038,#e85d8a)">
-      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+    <div class="card">
+      <div class="card-photo" style="background-image:linear-gradient(160deg,#1e1038,#e85d8a)">
+        <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      </div>
       <div class="card-info">
         <div class="card-loc">Ibirapuera<small>São Paulo, SP</small></div>
         <div class="card-stats"><span class="stat">❤ 96</span></div>
       </div>
     </div>
-    <div class="card" style="background-image:linear-gradient(160deg,#150a26,#ff5d6c)">
-      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+    <div class="card">
+      <div class="card-photo" style="background-image:linear-gradient(160deg,#150a26,#ff5d6c)">
+        <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      </div>
       <div class="card-info">
         <div class="card-loc">Praia da Barra<small>Salvador, BA</small></div>
         <div class="card-stats"><span class="stat">❤ 154</span></div>
       </div>
     </div>
-    <div class="card" style="background-image:linear-gradient(160deg,#4a2b63,#ffcf6b)">
-      <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+    <div class="card">
+      <div class="card-photo" style="background-image:linear-gradient(160deg,#4a2b63,#ffcf6b)">
+        <button class="heart-btn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.2 4.2 7.5 3.6 9.8 4.7 12 7c2.2-2.3 4.5-3.4 6.8-2.8C22 5 23.3 8.4 21.5 12 19 16.5 12 21 12 21z"/></svg></button>
+      </div>
       <div class="card-info">
         <div class="card-loc">Dunas do Jalapão<small>Tocantins</small></div>
         <div class="card-stats"><span class="stat">❤ 88</span></div>

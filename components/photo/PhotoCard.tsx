@@ -14,17 +14,19 @@ export default function PhotoCard({ photo, locationName, city, commentsCount, bi
   return (
     <Link
       href={`/photos/${photo.id}`}
-      className={`group relative block overflow-hidden rounded-2xl bg-cover bg-center ${big ? "col-span-2 row-span-2" : ""}`}
-      style={{ backgroundImage: `url(${photo.imageUrl})` }}
+      className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 light:border-line light:shadow-[0_2px_10px_rgba(74,43,99,0.05)] ${big ? "col-span-2 row-span-2" : ""}`}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-dusk-950/85 via-dusk-950/5 via-45% to-transparent to-65%" />
-      <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
-      <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-4">
-        <div className="font-display text-base font-medium">
+      <div className="relative min-h-0 flex-1 bg-cover bg-center" style={{ backgroundImage: `url(${photo.imageUrl})` }}>
+        <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
+      </div>
+      <div className="flex items-center justify-between gap-2.5 bg-dusk-900 px-3.5 py-2.5 light:bg-card">
+        <div className="min-w-0 truncate font-display text-sm font-medium">
           {locationName}
-          <small className="mt-0.5 block font-mono text-[0.68rem] font-normal opacity-70">{city}</small>
+          <small className="mt-0.5 block truncate font-mono text-[0.65rem] font-normal text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
+            {city}
+          </small>
         </div>
-        <div className="flex gap-2.5 font-mono text-xs">
+        <div className="flex shrink-0 gap-2.5 font-mono text-xs text-cream-dim opacity-85 light:text-ink-dim light:opacity-100">
           <span className="flex items-center gap-1">❤ {photo.likesCount}</span>
           {commentsCount !== undefined && <span className="flex items-center gap-1">💬 {commentsCount}</span>}
         </div>

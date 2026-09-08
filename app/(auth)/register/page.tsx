@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
+import { safeRedirectPath } from "@/lib/utils/safeRedirectPath";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,7 +24,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await register(name, email, password);
-      router.push("/");
+      router.push(safeRedirectPath(searchParams.get("redirect")));
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setError("Este e-mail já está cadastrado.");
@@ -76,10 +78,25 @@ export default function RegisterPage() {
       </form>
       <p className="mt-6 text-sm text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
         Já tem conta?{" "}
-        <Link href="/login" className="underline">
+        <Link
+          href={
+            searchParams.get("redirect")
+              ? `/login?redirect=${encodeURIComponent(searchParams.get("redirect")!)}`
+              : "/login"
+          }
+          className="underline"
+        >
           Entrar
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }

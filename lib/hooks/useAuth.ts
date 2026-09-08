@@ -46,6 +46,15 @@ function getServerSnapshot(): AuthResponse | null {
   return null;
 }
 
+// Para decisões side-effect (ex.: redirecionar se deslogado) fora do ciclo de
+// render — na hidratação, useSyncExternalStore reporta getServerSnapshot (null)
+// no primeiro render mesmo pra quem está logado, e um efeito que confiasse nesse
+// valor de render redirecionaria usuários autenticados por engano. Isso lê o
+// localStorage direto, sempre correto assim que o JS do cliente está rodando.
+export function hasStoredAuth(): boolean {
+  return readAuth() !== null;
+}
+
 // Access token dura só 15min por padrão — qualquer chamada autenticada feita perto
 // da expiração (ou depois dela) precisa renovar via refresh token antes. Dedup com
 // uma promise compartilhada evita duas renovações simultâneas "gastarem" o mesmo
@@ -109,6 +118,19 @@ export function useAuth() {
     return refreshed?.accessToken ?? null;
   }, []);
 
+  const updateProfile = useCallback(
+    async (data: { name: string; avatarUrl: string | null }) => {
+      const token = await getAccessToken();
+      const current = readAuth();
+      if (!token || !current) throw new Error("not authenticated");
+
+      const updatedUser = await authApi.updateMe(data, token);
+      writeAuth({ ...current, user: updatedUser });
+      return updatedUser;
+    },
+    [getAccessToken],
+  );
+
   return {
     user: auth?.user ?? null,
     token: auth?.accessToken ?? null,
@@ -117,5 +139,6 @@ export function useAuth() {
     register,
     logout,
     getAccessToken,
+    updateProfile,
   };
 }

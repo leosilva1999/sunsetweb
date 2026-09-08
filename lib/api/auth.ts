@@ -1,5 +1,7 @@
 import { apiFetch } from "@/lib/api/client";
 import type { User } from "@/types/user";
+import type { Photo } from "@/types/photo";
+import type { CursorPage } from "@/types/pagination";
 
 export interface AuthResponse {
   accessToken: string;
@@ -46,4 +48,13 @@ export function updateMe(data: { name: string; avatarUrl: string | null }, token
     body: JSON.stringify(data),
     token,
   });
+}
+
+export function getUserPhotos(id: string, cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<CursorPage<Photo>>(`/users/${id}/photos${suffix}`);
 }

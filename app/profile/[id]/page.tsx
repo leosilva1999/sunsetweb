@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getUser } from "@/lib/api/auth";
-import PhotoGrid from "@/components/photo/PhotoGrid";
-import { apiFetch } from "@/lib/api/client";
-import type { Photo } from "@/types/photo";
-import type { CursorPage } from "@/types/pagination";
+import { getUser, getUserPhotos } from "@/lib/api/auth";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfilePhotos from "@/components/profile/ProfilePhotos";
 
 export async function generateMetadata({ params }: PageProps<"/profile/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -24,26 +22,16 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
     notFound();
   }
 
-  const photos = await apiFetch<CursorPage<Photo>>(`/users/${id}/photos`).catch(() => ({
-    items: [] as Photo[],
+  const photos = await getUserPhotos(id).catch(() => ({
+    items: [],
     nextCursor: null,
     hasMore: false,
   }));
 
   return (
     <div className="px-[5vw] py-32">
-      <h1 className="mb-10 font-display text-3xl font-semibold">{user.name}</h1>
-      {photos.items.length === 0 ? (
-        <p className="text-sm text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">Este usuário ainda não postou fotos.</p>
-      ) : (
-        <PhotoGrid
-          items={photos.items.map((photo) => ({
-            photo,
-            locationName: photo.locationName,
-            city: "",
-          }))}
-        />
-      )}
+      <ProfileHeader user={user} />
+      <ProfilePhotos userId={id} initialPage={photos} />
     </div>
   );
 }
