@@ -119,7 +119,7 @@ export function useAuth() {
   }, []);
 
   const updateProfile = useCallback(
-    async (data: { name: string; avatarUrl: string | null }) => {
+    async (data: Partial<{ name: string; avatarUrl: string | null; bio: string | null }>) => {
       const token = await getAccessToken();
       const current = readAuth();
       if (!token || !current) throw new Error("not authenticated");

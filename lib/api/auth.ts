@@ -42,7 +42,10 @@ export function getUser(id: string) {
   return apiFetch<User>(`/users/${id}`);
 }
 
-export function updateMe(data: { name: string; avatarUrl: string | null }, token: string) {
+export function updateMe(
+  data: Partial<{ name: string; avatarUrl: string | null; bio: string | null }>,
+  token: string,
+) {
   return apiFetch<User>("/users/me", {
     method: "PATCH",
     body: JSON.stringify(data),

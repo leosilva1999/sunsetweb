@@ -42,6 +42,15 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
         <div className="mt-1.5 font-mono text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
           Entrou em {formatDate(displayedUser.createdAt)}
         </div>
+        {displayedUser.bio ? (
+          <p className="mt-3 max-w-md text-sm text-cream-dim light:text-ink-dim">{displayedUser.bio}</p>
+        ) : (
+          isOwnProfile && (
+            <p className="mt-3 text-sm text-cream-dim opacity-60 italic light:text-ink-dim light:opacity-100">
+              Adicione uma descrição sobre você.
+            </p>
+          )
+        )}
       </div>
 
       {isOwnProfile && (

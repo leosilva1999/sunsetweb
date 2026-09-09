@@ -13,10 +13,13 @@ interface EditProfileModalProps {
   onCancel: () => void;
 }
 
+const BIO_MAX_LENGTH = 160;
+
 export default function EditProfileModal({ open, user, onSaved, onCancel }: EditProfileModalProps) {
   const { updateProfile } = useAuth();
   const [name, setName] = useState(user.name);
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? "");
+  const [bio, setBio] = useState(user.bio ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -24,6 +27,7 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
     if (open) {
       setName(user.name);
       setAvatarUrl(user.avatarUrl ?? "");
+      setBio(user.bio ?? "");
       setError(null);
     }
   }, [open, user]);
@@ -44,7 +48,11 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
     setIsSaving(true);
     setError(null);
     try {
-      const updated = await updateProfile({ name: name.trim(), avatarUrl: avatarUrl.trim() || null });
+      const updated = await updateProfile({
+        name: name.trim(),
+        avatarUrl: avatarUrl.trim() || null,
+        bio: bio.trim() || null,
+      });
       onSaved(updated);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível salvar as alterações.");
@@ -81,6 +89,19 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
             placeholder="URL do avatar (opcional)"
             className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
           />
+          <div>
+            <textarea
+              value={bio}
+              onChange={(event) => setBio(event.target.value.slice(0, BIO_MAX_LENGTH))}
+              placeholder="Conte um pouco sobre você (opcional)"
+              rows={3}
+              maxLength={BIO_MAX_LENGTH}
+              className="w-full resize-none rounded-2xl border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
+            />
+            <span className="mt-1 block text-right font-mono text-xs text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
+              {bio.length}/{BIO_MAX_LENGTH}
+            </span>
+          </div>
           {error && <p className="text-sm text-sun-deep">{error}</p>}
           <div className="mt-2 flex justify-end gap-3">
             <button
