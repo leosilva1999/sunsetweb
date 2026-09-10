@@ -2,81 +2,27 @@ import SearchBar from "@/components/ui/SearchBar";
 import RankingList from "@/components/location/RankingList";
 import GalleryTabs from "@/components/photo/GalleryTabs";
 import UploadCtaButton from "@/components/photo/UploadCtaButton";
-import type { Location } from "@/types/location";
+import { getLocationRanking } from "@/lib/api/locations";
+import { getPhotos } from "@/lib/api/photos";
 import type { PhotoGridItem } from "@/components/photo/PhotoGrid";
 
-function gradient(colors: string[]) {
-  const stops = colors
-    .map((color, index) => `<stop offset="${(index / (colors.length - 1)) * 100}%" stop-color="${color}"/>`)
-    .join("");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">${stops}</linearGradient></defs><rect width="400" height="300" fill="url(#g)"/></svg>`;
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
-}
+// Sem searchParams/cookies, a home seria pré-renderizada estática no build e
+// congelaria o ranking/fotos recentes daquele momento — revalida periodicamente
+// em vez de exigir um redeploy pra refletir dados novos.
+export const revalidate = 60;
 
-const NOW = new Date().toISOString();
+export default async function HomePage() {
+  const [ranking, photosPage] = await Promise.all([
+    getLocationRanking("week", 4).catch(() => []),
+    getPhotos("recent", undefined, 5).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
+  ]);
 
-const MOCK_RANKING: Location[] = [
-  { id: "1", name: "Chapada dos Veadeiros, GO", city: "São Jorge, GO", latitude: -14.1667, longitude: -47.5, avgRating: 4.9, createdAt: NOW },
-  { id: "2", name: "Jericoacoara, CE", city: "Ceará", latitude: -2.7975, longitude: -40.5137, avgRating: 4.8, createdAt: NOW },
-  { id: "3", name: "Pôr do Sol da Barra, Salvador BA", city: "Salvador, BA", latitude: -13.01, longitude: -38.5321, avgRating: 4.7, createdAt: NOW },
-  { id: "4", name: "Fernando de Noronha, PE", city: "Pernambuco", latitude: -3.8536, longitude: -32.4297, avgRating: 4.7, createdAt: NOW },
-];
+  const galleryItems: PhotoGridItem[] = photosPage.items.map((photo) => ({
+    photo,
+    locationName: photo.locationName,
+    city: "",
+  }));
 
-function mockPhoto(
-  id: string,
-  locationId: string,
-  locationName: string,
-  colors: string[],
-  likesCount: number,
-  commentsCount = 0,
-): PhotoGridItem["photo"] {
-  return {
-    id,
-    userId: "u1",
-    userName: "Sunset",
-    userAvatarUrl: null,
-    locationId,
-    locationName,
-    imageUrl: gradient(colors),
-    caption: null,
-    likesCount,
-    likedByCurrentUser: false,
-    commentsCount,
-    createdAt: NOW,
-  };
-}
-
-const MOCK_GALLERY: PhotoGridItem[] = [
-  {
-    photo: mockPhoto("p1", "1", "Chapada dos Veadeiros", ["#150a26", "#4a2b63", "#ff5d6c", "#ffcf6b"], 428, 31),
-    locationName: "Chapada dos Veadeiros",
-    city: "São Jorge, GO",
-  },
-  {
-    photo: mockPhoto("p2", "2", "Jericoacoara", ["#2d1b4e", "#ff8c5a"], 217),
-    locationName: "Jericoacoara",
-    city: "Ceará",
-  },
-  {
-    photo: mockPhoto("p3", "5", "Ibirapuera", ["#1e1038", "#e85d8a"], 96),
-    locationName: "Ibirapuera",
-    city: "São Paulo, SP",
-  },
-  {
-    photo: mockPhoto("p4", "3", "Praia da Barra", ["#150a26", "#ff5d6c"], 154),
-    locationName: "Praia da Barra",
-    city: "Salvador, BA",
-  },
-  {
-    photo: mockPhoto("p5", "6", "Dunas do Jalapão", ["#4a2b63", "#ffcf6b"], 88),
-    locationName: "Dunas do Jalapão",
-    city: "Tocantins",
-  },
-];
-
-const GALLERY_TABS = ["Recentes", "Mais curtidas", "Perto de mim"];
-
-export default function HomePage() {
   return (
     <>
       <header className="relative flex h-screen min-h-[640px] flex-col justify-end overflow-hidden bg-[linear-gradient(180deg,var(--dusk-950)_0%,var(--dusk-900)_22%,var(--dusk-700)_42%,var(--sun-deep)_60%,var(--sun-mid)_72%,var(--sun-core)_82%,#fff2d6_100%)] light:bg-[linear-gradient(180deg,#fef1de_0%,#ffe0bd_22%,#ffb98a_42%,var(--sun-deep)_62%,var(--sun-mid)_76%,var(--sun-core)_88%,#fff2d6_100%)]">
@@ -118,7 +64,13 @@ export default function HomePage() {
             Calculado com base nas curtidas e nas notas dadas pela comunidade nos últimos 7 dias.
           </p>
         </div>
-        <RankingList locations={MOCK_RANKING} />
+        {ranking.length === 0 ? (
+          <p className="text-sm text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
+            Nenhum local avaliado nos últimos 7 dias ainda.
+          </p>
+        ) : (
+          <RankingList locations={ranking} />
+        )}
       </section>
 
       <section id="gallery" className="bg-dusk-950 px-[5vw] py-24 light:bg-paper">
@@ -132,7 +84,7 @@ export default function HomePage() {
             </h2>
           </div>
         </div>
-        <GalleryTabs tabs={GALLERY_TABS} items={MOCK_GALLERY} />
+        <GalleryTabs initialItems={galleryItems} />
       </section>
 
       <section
