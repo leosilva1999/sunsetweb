@@ -9,5 +9,6 @@ export interface Photo {
   caption: string | null;
   likesCount: number;
   likedByCurrentUser: boolean;
+  commentsCount: number;
   createdAt: string;
 }

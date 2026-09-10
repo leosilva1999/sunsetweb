@@ -5,4 +5,6 @@ export interface Comment {
   userAvatarUrl: string | null;
   content: string;
   createdAt: string;
+  parentCommentId: string | null;
+  repliesCount: number;
 }

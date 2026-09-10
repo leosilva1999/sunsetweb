@@ -16,22 +16,50 @@ interface CommentsProps {
 
 export default function Comments({ photoId, initialPage }: CommentsProps) {
   const { user } = useAuth();
-  const { comments, hasMore, isLoadingMore, post, remove, loadMore } = useComments(photoId, initialPage);
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const {
+    comments,
+    hasMore,
+    isLoadingMore,
+    repliesByCommentId,
+    loadingReplyIds,
+    post,
+    postReply,
+    remove,
+    removeReply,
+    loadMore,
+    toggleReplies,
+    loadMoreReplies,
+  } = useComments(photoId, initialPage);
+  const [pendingDelete, setPendingDelete] = useState<Comment | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirmDelete = async () => {
-    if (!pendingDeleteId) return;
+    if (!pendingDelete) return;
     setIsDeleting(true);
-    await remove(pendingDeleteId);
+    if (pendingDelete.parentCommentId) {
+      await removeReply(pendingDelete.parentCommentId, pendingDelete.id);
+    } else {
+      await remove(pendingDelete.id);
+    }
     setIsDeleting(false);
-    setPendingDeleteId(null);
+    setPendingDelete(null);
   };
+
+  const isCascadingDelete = !!pendingDelete && !pendingDelete.parentCommentId && pendingDelete.repliesCount > 0;
 
   return (
     <div>
       <CommentForm onSubmit={post} />
-      <CommentList comments={comments} currentUserId={user?.id} onDelete={setPendingDeleteId} />
+      <CommentList
+        comments={comments}
+        currentUserId={user?.id}
+        repliesByCommentId={repliesByCommentId}
+        loadingReplyIds={loadingReplyIds}
+        onDelete={setPendingDelete}
+        onToggleReplies={toggleReplies}
+        onLoadMoreReplies={loadMoreReplies}
+        onSubmitReply={postReply}
+      />
       {hasMore && (
         <button
           onClick={loadMore}
@@ -43,13 +71,19 @@ export default function Comments({ photoId, initialPage }: CommentsProps) {
       )}
 
       <ConfirmDialog
-        open={pendingDeleteId !== null}
+        open={pendingDelete !== null}
         title="Excluir comentário?"
-        description="Essa ação não pode ser desfeita."
+        description={
+          isCascadingDelete
+            ? `Essa ação não pode ser desfeita e vai excluir também ${
+                pendingDelete!.repliesCount === 1 ? "a resposta" : `as ${pendingDelete!.repliesCount} respostas`
+              }.`
+            : "Essa ação não pode ser desfeita."
+        }
         confirmLabel="Excluir"
         isConfirming={isDeleting}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setPendingDeleteId(null)}
+        onCancel={() => setPendingDelete(null)}
       />
     </div>
   );

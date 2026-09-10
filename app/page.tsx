@@ -22,7 +22,14 @@ const MOCK_RANKING: Location[] = [
   { id: "4", name: "Fernando de Noronha, PE", city: "Pernambuco", latitude: -3.8536, longitude: -32.4297, avgRating: 4.7, createdAt: NOW },
 ];
 
-function mockPhoto(id: string, locationId: string, locationName: string, colors: string[], likesCount: number): PhotoGridItem["photo"] {
+function mockPhoto(
+  id: string,
+  locationId: string,
+  locationName: string,
+  colors: string[],
+  likesCount: number,
+  commentsCount = 0,
+): PhotoGridItem["photo"] {
   return {
     id,
     userId: "u1",
@@ -34,16 +41,16 @@ function mockPhoto(id: string, locationId: string, locationName: string, colors:
     caption: null,
     likesCount,
     likedByCurrentUser: false,
+    commentsCount,
     createdAt: NOW,
   };
 }
 
 const MOCK_GALLERY: PhotoGridItem[] = [
   {
-    photo: mockPhoto("p1", "1", "Chapada dos Veadeiros", ["#150a26", "#4a2b63", "#ff5d6c", "#ffcf6b"], 428),
+    photo: mockPhoto("p1", "1", "Chapada dos Veadeiros", ["#150a26", "#4a2b63", "#ff5d6c", "#ffcf6b"], 428, 31),
     locationName: "Chapada dos Veadeiros",
     city: "São Jorge, GO",
-    commentsCount: 31,
   },
   {
     photo: mockPhoto("p2", "2", "Jericoacoara", ["#2d1b4e", "#ff8c5a"], 217),

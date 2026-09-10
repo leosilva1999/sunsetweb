@@ -5,7 +5,6 @@ export interface PhotoGridItem {
   photo: Photo;
   locationName: string;
   city: string;
-  commentsCount?: number;
 }
 
 interface PhotoGridProps {

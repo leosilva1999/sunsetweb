@@ -6,11 +6,10 @@ interface PhotoCardProps {
   photo: Photo;
   locationName: string;
   city: string;
-  commentsCount?: number;
   big?: boolean;
 }
 
-export default function PhotoCard({ photo, locationName, city, commentsCount, big }: PhotoCardProps) {
+export default function PhotoCard({ photo, locationName, city, big }: PhotoCardProps) {
   return (
     <Link
       href={`/photos/${photo.id}`}
@@ -28,7 +27,7 @@ export default function PhotoCard({ photo, locationName, city, commentsCount, bi
         </div>
         <div className="flex shrink-0 gap-2.5 font-mono text-xs text-cream-dim opacity-85 light:text-ink-dim light:opacity-100">
           <span className="flex items-center gap-1">❤ {photo.likesCount}</span>
-          {commentsCount !== undefined && <span className="flex items-center gap-1">💬 {commentsCount}</span>}
+          <span className="flex items-center gap-1">💬 {photo.commentsCount}</span>
         </div>
       </div>
     </Link>

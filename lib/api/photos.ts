@@ -48,14 +48,23 @@ export function getPhotoComments(id: string, cursor?: string, limit?: number) {
   return apiFetch<CursorPage<Comment>>(`/photos/${id}/comments${suffix}`);
 }
 
-export function createComment(id: string, content: string, token: string) {
+export function createComment(id: string, content: string, token: string, parentCommentId: string | null = null) {
   return apiFetch<Comment>(`/photos/${id}/comments`, {
     method: "POST",
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, parentCommentId }),
     token,
   });
 }
 
 export function deleteComment(id: string, token: string) {
   return apiFetch<void>(`/comments/${id}`, { method: "DELETE", token });
+}
+
+export function getCommentReplies(commentId: string, cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<CursorPage<Comment>>(`/comments/${commentId}/replies${suffix}`);
 }
