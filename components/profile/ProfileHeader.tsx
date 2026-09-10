@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useUploadModal } from "@/lib/hooks/useUploadModal";
 import { formatDate } from "@/lib/utils/formatDate";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import EditProfileModal from "@/components/profile/EditProfileModal";
@@ -13,6 +14,7 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ user }: ProfileHeaderProps) {
   const { user: authUser, logout } = useAuth();
+  const { open: openUploadModal } = useUploadModal();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -55,6 +57,12 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
 
       {isOwnProfile && (
         <div className="flex gap-3">
+          <button
+            onClick={openUploadModal}
+            className="rounded-full bg-cream px-4 py-2.5 text-sm font-bold text-ink transition-transform hover:-translate-y-0.5 light:bg-ink light:text-paper"
+          >
+            Postar foto
+          </button>
           <button
             onClick={() => setIsEditOpen(true)}
             className="rounded-full border border-white/15 px-4 py-2.5 text-sm font-medium opacity-85 hover:opacity-100 light:border-ink/15"

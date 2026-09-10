@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Karla, JetBrains_Mono } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import AppProviders from "@/components/layout/AppProviders";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -52,9 +53,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-dusk-950 text-cream font-body light:bg-paper light:text-ink">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <AppProviders>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AppProviders>
       </body>
     </html>
   );

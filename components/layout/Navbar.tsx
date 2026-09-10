@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useUploadModal } from "@/lib/hooks/useUploadModal";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { open: openUploadModal } = useUploadModal();
+  const router = useRouter();
+  const pathname = usePathname();
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -16,6 +21,14 @@ export default function Navbar() {
     await logout();
     setIsLoggingOut(false);
     setConfirmLogoutOpen(false);
+  };
+
+  const handleUploadClick = () => {
+    if (isAuthenticated) {
+      openUploadModal();
+    } else {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+    }
   };
 
   return (
@@ -32,9 +45,9 @@ export default function Navbar() {
           <Link href="/locations" className="opacity-85 hover:opacity-100">
             Explorar
           </Link>
-          <Link href="/upload" className="opacity-85 hover:opacity-100">
+          <button onClick={handleUploadClick} className="opacity-85 hover:opacity-100">
             Postar foto
-          </Link>
+          </button>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />

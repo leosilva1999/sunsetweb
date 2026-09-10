@@ -22,15 +22,20 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
   const [bio, setBio] = useState(user.bio ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [wasOpen, setWasOpen] = useState(open);
 
-  useEffect(() => {
+  // Reajusta o estado durante a renderização (não num efeito) ao abrir o modal —
+  // é o padrão recomendado pelo React pra "resetar estado quando algo muda":
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) {
       setName(user.name);
       setAvatarUrl(user.avatarUrl ?? "");
       setBio(user.bio ?? "");
       setError(null);
     }
-  }, [open, user]);
+  }
 
   useEffect(() => {
     if (!open) return;

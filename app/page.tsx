@@ -1,7 +1,7 @@
-import Link from "next/link";
 import SearchBar from "@/components/ui/SearchBar";
 import RankingList from "@/components/location/RankingList";
 import GalleryTabs from "@/components/photo/GalleryTabs";
+import UploadCtaButton from "@/components/photo/UploadCtaButton";
 import type { Location } from "@/types/location";
 import type { PhotoGridItem } from "@/components/photo/PhotoGrid";
 
@@ -151,15 +151,7 @@ export default function HomePage() {
             ranking do local.
           </p>
         </div>
-        <Link
-          href="/upload"
-          className="relative z-[2] inline-flex items-center gap-2.5 whitespace-nowrap rounded-full bg-sun-core px-8.5 py-4 text-sm font-bold text-ink transition-transform hover:-translate-y-0.5 light:bg-ink light:text-paper"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="text-ink light:text-paper">
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg>
-          Postar foto
-        </Link>
+        <UploadCtaButton className="relative z-[2] inline-flex items-center gap-2.5 whitespace-nowrap rounded-full bg-sun-core px-8.5 py-4 text-sm font-bold text-ink transition-transform hover:-translate-y-0.5 light:bg-ink light:text-paper" />
       </section>
     </>
   );
