@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLocation, getLocationPhotos } from "@/lib/api/locations";
+import { getLocation, getLocationPhotos, getLocationRatings } from "@/lib/api/locations";
 import PhotoGrid from "@/components/photo/PhotoGrid";
+import LocationRatings from "@/components/location/LocationRatings";
 
 export async function generateMetadata({ params }: PageProps<"/locations/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -19,9 +20,10 @@ export async function generateMetadata({ params }: PageProps<"/locations/[id]">)
 export default async function LocationDetailPage({ params }: PageProps<"/locations/[id]">) {
   const { id } = await params;
 
-  const [location, photos] = await Promise.all([
+  const [location, photos, ratings] = await Promise.all([
     getLocation(id).catch(() => null),
     getLocationPhotos(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
+    getLocationRatings(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
   ]);
 
   if (!location) {
@@ -53,6 +55,9 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
           }))}
         />
       )}
+
+      <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Avaliações</h2>
+      <LocationRatings locationId={id} initialPage={ratings} />
     </div>
   );
 }
