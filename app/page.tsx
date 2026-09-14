@@ -1,4 +1,4 @@
-import SearchBar from "@/components/ui/SearchBar";
+import SearchBar from "@/components/location/SearchBar";
 import RankingList from "@/components/location/RankingList";
 import GalleryTabs from "@/components/photo/GalleryTabs";
 import UploadCtaButton from "@/components/photo/UploadCtaButton";
