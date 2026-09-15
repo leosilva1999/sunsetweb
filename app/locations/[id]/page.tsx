@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getLocation, getLocationPhotos, getLocationRatings } from "@/lib/api/locations";
 import PhotoGrid from "@/components/photo/PhotoGrid";
 import LocationRatings from "@/components/location/LocationRatings";
+import LocationMap from "@/components/location/LocationMap";
 
 export async function generateMetadata({ params }: PageProps<"/locations/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -42,6 +43,9 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
           <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
         </svg>
       </div>
+
+      <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Onde fica</h2>
+      <LocationMap latitude={location.latitude} longitude={location.longitude} name={location.name} />
 
       <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Fotos do local</h2>
       {photos.items.length === 0 ? (
