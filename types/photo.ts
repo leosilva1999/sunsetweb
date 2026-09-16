@@ -12,3 +12,8 @@ export interface Photo {
   commentsCount: number;
   createdAt: string;
 }
+
+export interface PhotoUploadUrl {
+  uploadUrl: string;
+  imageUrl: string;
+}

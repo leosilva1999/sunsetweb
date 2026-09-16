@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { Photo } from "@/types/photo";
+import type { Photo, PhotoUploadUrl } from "@/types/photo";
 import type { Comment } from "@/types/comment";
 import type { CursorPage } from "@/types/pagination";
 
@@ -25,6 +25,28 @@ export function createPhoto(
     body: JSON.stringify(data),
     token,
   });
+}
+
+export function createPhotoUploadUrl(contentType: string, token: string) {
+  return apiFetch<PhotoUploadUrl>("/photos/upload-url", {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
+    token,
+  });
+}
+
+// PUT direto pro storage (LocalStack em dev) via URL pré-assinada — não passa pelo
+// apiFetch porque não é uma chamada pra própria API (sem base URL, sem Bearer token,
+// content-type é o da imagem, não application/json).
+export async function uploadPhotoBlob(uploadUrl: string, blob: Blob): Promise<void> {
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": blob.type },
+    body: blob,
+  });
+  if (!response.ok) {
+    throw new Error("Falha ao enviar a imagem para o storage.");
+  }
 }
 
 export function deletePhoto(id: string, token: string) {
