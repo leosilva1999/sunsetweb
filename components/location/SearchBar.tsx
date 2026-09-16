@@ -30,6 +30,10 @@ export default function SearchBar({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const requestIdRef = useRef(0);
+  // Selecionar uma sugestão muda `query` pro nome escolhido, o que re-dispararia
+  // o efeito de busca abaixo e reabriria o dropdown com o próprio local já
+  // selecionado como "sugestão" — essa flag pula essa única próxima busca.
+  const skipNextSearchRef = useRef(false);
   const [wasEmpty, setWasEmpty] = useState(!defaultValue.trim());
 
   // Ajusta o estado durante a renderização (não num efeito) quando a busca
@@ -49,6 +53,10 @@ export default function SearchBar({
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed) return;
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return;
+    }
     if (Date.now() < rateLimitedUntil) return;
 
     const requestId = ++requestIdRef.current;
@@ -114,6 +122,7 @@ export default function SearchBar({
   };
 
   const handleSelect = (location: Location) => {
+    skipNextSearchRef.current = true;
     setIsOpen(false);
     setQuery(location.name);
     router.push(`/locations/${location.id}`);
