@@ -44,8 +44,11 @@ export default function PhotoActions({ photo }: PhotoActionsProps) {
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
-        className="text-sm text-cream-dim opacity-70 hover:text-sun-deep hover:opacity-100 light:text-ink-dim light:opacity-100"
+        className="inline-flex items-center gap-2 rounded-full border border-sun-deep/40 px-5 py-2.5 text-sm font-medium text-sun-deep transition-colors hover:bg-sun-deep/10"
       >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z" />
+        </svg>
         Excluir foto
       </button>
       {error && <p className="mt-2 text-sm text-sun-deep">{error}</p>}
