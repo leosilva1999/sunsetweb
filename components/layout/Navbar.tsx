@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -35,8 +36,17 @@ export default function Navbar() {
     <>
       <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between bg-gradient-to-b from-dusk-950/85 to-transparent px-[5vw] py-5 backdrop-blur-[2px] light:from-paper/90">
         <Link href="/" className="flex items-center">
-          <img src="/images/logo-horizontal.svg" alt="Sunset" className="h-8 w-auto light:hidden" />
-          <img src="/images/logo-horizontal-light.svg" alt="Sunset" className="hidden h-8 w-auto light:block" />
+          {/* SVGs locais - unoptimized evita a exigência de dangerouslyAllowSVG no config só pra um logo vetorial que já é pequeno. */}
+          <Image src="/images/logo-horizontal.svg" alt="Sunset" width={400} height={100} unoptimized priority className="h-8 w-auto light:hidden" />
+          <Image
+            src="/images/logo-horizontal-light.svg"
+            alt="Sunset"
+            width={400}
+            height={100}
+            unoptimized
+            priority
+            className="hidden h-8 w-auto light:block"
+          />
         </Link>
         <div className="hidden gap-8 text-sm font-medium md:flex">
           <Link href="/ranking" className="opacity-85 hover:opacity-100">

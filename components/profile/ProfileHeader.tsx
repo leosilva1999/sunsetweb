@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useUploadModal } from "@/lib/hooks/useUploadModal";
 import { formatDate } from "@/lib/utils/formatDate";
@@ -32,7 +33,11 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
   return (
     <div className="mb-14 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
       {displayedUser.avatarUrl ? (
-        <img src={displayedUser.avatarUrl} alt="" className="h-24 w-24 rounded-full object-cover" />
+        // unoptimized: avatarUrl é uma URL arbitrária que o próprio usuário escolhe
+        // (ver EditProfileModal) - não dá pra colocar todo host possível em
+        // remotePatterns, e permitir qualquer host lá seria abrir um proxy de
+        // imagens pro servidor buscar URLs arbitrárias de terceiros.
+        <Image src={displayedUser.avatarUrl} alt="" width={96} height={96} unoptimized className="h-24 w-24 rounded-full object-cover" />
       ) : (
         <span className="flex h-24 w-24 items-center justify-center rounded-full bg-cream/15 font-display text-3xl light:bg-ink/10">
           {displayedUser.name.charAt(0).toUpperCase()}

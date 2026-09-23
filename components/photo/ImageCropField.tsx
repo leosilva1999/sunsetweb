@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState, type ChangeEvent } from "react";
+import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
 import { getCroppedImageBlob } from "@/lib/utils/imageCrop";
 
@@ -152,7 +153,16 @@ export default function ImageCropField({ onImageReady }: ImageCropFieldProps) {
 
       {preview && (
         <div className="flex items-center gap-3">
-          <img src={preview.url} alt="Pré-visualização da foto" className="h-20 w-20 rounded-xl object-cover" />
+          {/* unoptimized: preview.url é um blob: (URL.createObjectURL) - só existe no
+              browser desta aba, o otimizador de imagem do Next não tem como buscá-lo. */}
+          <Image
+            src={preview.url}
+            alt="Pré-visualização da foto"
+            width={80}
+            height={80}
+            unoptimized
+            className="h-20 w-20 rounded-xl object-cover"
+          />
           <div className="flex flex-col gap-1">
             <span className="text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
               {Math.round(preview.size / 1024)} KB

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { formatDate } from "@/lib/utils/formatDate";
 import CommentForm from "@/components/photo/CommentForm";
 import type { Comment } from "@/types/comment";
@@ -108,10 +109,22 @@ interface CommentHeaderProps {
 
 function CommentHeader({ comment, currentUserId, onDelete, compact }: CommentHeaderProps) {
   const size = compact ? "h-6 w-6" : "h-7 w-7";
+  const sizePx = compact ? 24 : 28;
   return (
     <div className="mb-1.5 flex items-center gap-2.5">
       {comment.userAvatarUrl ? (
-        <img src={comment.userAvatarUrl} alt="" className={`${size} rounded-full object-cover`} />
+        // unoptimized: avatarUrl é uma URL arbitrária que o próprio usuário escolhe
+        // (ver EditProfileModal) - não dá pra colocar todo host possível em
+        // remotePatterns, e permitir qualquer host lá seria abrir um proxy de
+        // imagens pro servidor buscar URLs arbitrárias de terceiros.
+        <Image
+          src={comment.userAvatarUrl}
+          alt=""
+          width={sizePx}
+          height={sizePx}
+          unoptimized
+          className={`${size} rounded-full object-cover`}
+        />
       ) : (
         <span className={`flex ${size} items-center justify-center rounded-full bg-cream/15 font-mono text-xs light:bg-ink/10`}>
           {comment.userName.charAt(0).toUpperCase()}

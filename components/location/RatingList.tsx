@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { formatDate } from "@/lib/utils/formatDate";
 import type { Rating } from "@/types/rating";
 
@@ -18,7 +19,11 @@ export default function RatingList({ ratings }: RatingListProps) {
         <li key={rating.id} className="border-b border-white/10 pb-4 text-sm light:border-line">
           <div className="mb-1.5 flex flex-wrap items-center gap-2.5">
             {rating.userAvatarUrl ? (
-              <img src={rating.userAvatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+              // unoptimized: avatarUrl é uma URL arbitrária que o próprio usuário escolhe
+              // (ver EditProfileModal) - não dá pra colocar todo host possível em
+              // remotePatterns, e permitir qualquer host lá seria abrir um proxy de
+              // imagens pro servidor buscar URLs arbitrárias de terceiros.
+              <Image src={rating.userAvatarUrl} alt="" width={28} height={28} unoptimized className="h-7 w-7 rounded-full object-cover" />
             ) : (
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cream/15 font-mono text-xs light:bg-ink/10">
                 {rating.userName.charAt(0).toUpperCase()}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, type FormEvent } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
@@ -42,8 +43,16 @@ function RegisterForm() {
 
   return (
     <div className="mx-auto max-w-sm px-[5vw] py-32">
-      <img src="/images/logo-vertical.svg" alt="Sunset" className="mx-auto mb-10 h-24 w-auto light:hidden" />
-      <img src="/images/logo-vertical-light.svg" alt="Sunset" className="mx-auto mb-10 hidden h-24 w-auto light:block" />
+      {/* SVGs locais - unoptimized evita a exigência de dangerouslyAllowSVG no config só pra um logo vetorial que já é pequeno. */}
+      <Image src="/images/logo-vertical.svg" alt="Sunset" width={160} height={160} unoptimized className="mx-auto mb-10 h-24 w-auto light:hidden" />
+      <Image
+        src="/images/logo-vertical-light.svg"
+        alt="Sunset"
+        width={160}
+        height={160}
+        unoptimized
+        className="mx-auto mb-10 hidden h-24 w-auto light:block"
+      />
       <h1 className="mb-8 text-center font-display text-2xl font-semibold">Criar conta</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <input
