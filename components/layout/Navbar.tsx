@@ -55,6 +55,9 @@ export default function Navbar() {
           <Link href="/locations" className="opacity-85 hover:opacity-100">
             Explorar
           </Link>
+          <Link href="/photos" className="opacity-85 hover:opacity-100">
+            Fotos
+          </Link>
           <button onClick={handleUploadClick} className="opacity-85 hover:opacity-100">
             Postar foto
           </button>
