@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { User } from "@/types/user";
+import type { User, AvatarUploadUrl } from "@/types/user";
 import type { Photo } from "@/types/photo";
 import type { CursorPage } from "@/types/pagination";
 
@@ -49,6 +49,14 @@ export function updateMe(
   return apiFetch<User>("/users/me", {
     method: "PATCH",
     body: JSON.stringify(data),
+    token,
+  });
+}
+
+export function createAvatarUploadUrl(contentType: string, token: string) {
+  return apiFetch<AvatarUploadUrl>("/users/me/avatar-upload-url", {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
     token,
   });
 }

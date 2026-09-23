@@ -7,18 +7,34 @@ import { getCroppedImageBlob } from "@/lib/utils/imageCrop";
 
 interface ImageCropFieldProps {
   onImageReady: (blob: Blob | null) => void;
+  /** URL já existente pra mostrar como preview inicial (ex.: avatar atual) antes de qualquer troca. */
+  initialPreviewUrl?: string | null;
+  aspect?: number;
+  cropShape?: "rect" | "round";
+  previewSize?: number;
 }
 
-const ASPECT_RATIO = 4 / 3;
+const DEFAULT_ASPECT_RATIO = 4 / 3;
 const MAX_DIMENSION = 1600;
 const JPEG_QUALITY = 0.85;
 
-export default function ImageCropField({ onImageReady }: ImageCropFieldProps) {
+export default function ImageCropField({
+  onImageReady,
+  initialPreviewUrl,
+  aspect = DEFAULT_ASPECT_RATIO,
+  cropShape = "rect",
+  previewSize = 80,
+}: ImageCropFieldProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const [preview, setPreview] = useState<{ url: string; size: number } | null>(null);
+  const [preview, setPreview] = useState<{ url: string; size: number | null } | null>(
+    initialPreviewUrl ? { url: initialPreviewUrl, size: null } : null,
+  );
+  // Distingue "preview é o valor original" (botão remove pra null) de "preview é um
+  // corte novo aplicado" (botão descarta e volta pro seletor de arquivo).
+  const [isInitialPreview, setIsInitialPreview] = useState(Boolean(initialPreviewUrl));
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +55,7 @@ export default function ImageCropField({ onImageReady }: ImageCropFieldProps) {
     }
     setError(null);
     setPreview(null);
+    setIsInitialPreview(false);
     onImageReady(null);
     const reader = new FileReader();
     reader.onload = () => setImageSrc(reader.result as string);
@@ -56,6 +73,7 @@ export default function ImageCropField({ onImageReady }: ImageCropFieldProps) {
     try {
       const blob = await getCroppedImageBlob(imageSrc, croppedAreaPixels, MAX_DIMENSION, JPEG_QUALITY);
       setPreview({ url: URL.createObjectURL(blob), size: blob.size });
+      setIsInitialPreview(false);
       onImageReady(blob);
       resetSelection();
     } catch {
@@ -68,6 +86,7 @@ export default function ImageCropField({ onImageReady }: ImageCropFieldProps) {
   const handleRemove = () => {
     if (preview) URL.revokeObjectURL(preview.url);
     setPreview(null);
+    setIsInitialPreview(false);
     resetSelection();
     onImageReady(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -115,7 +134,8 @@ export default function ImageCropField({ onImageReady }: ImageCropFieldProps) {
               image={imageSrc}
               crop={crop}
               zoom={zoom}
-              aspect={ASPECT_RATIO}
+              aspect={aspect}
+              cropShape={cropShape}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={handleCropComplete}
@@ -153,26 +173,30 @@ export default function ImageCropField({ onImageReady }: ImageCropFieldProps) {
 
       {preview && (
         <div className="flex items-center gap-3">
-          {/* unoptimized: preview.url é um blob: (URL.createObjectURL) - só existe no
-              browser desta aba, o otimizador de imagem do Next não tem como buscá-lo. */}
+          {/* unoptimized: preview.url tanto pode ser um blob: (URL.createObjectURL, corte
+              recém-aplicado) quanto uma URL remota já existente (avatar atual) - nenhum dos
+              dois casos passa pelo otimizador de imagem do Next. */}
           <Image
             src={preview.url}
-            alt="Pré-visualização da foto"
-            width={80}
-            height={80}
+            alt="Pré-visualização"
+            width={previewSize}
+            height={previewSize}
             unoptimized
-            className="h-20 w-20 rounded-xl object-cover"
+            style={{ width: previewSize, height: previewSize }}
+            className={`object-cover ${cropShape === "round" ? "rounded-full" : "rounded-xl"}`}
           />
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
-              {Math.round(preview.size / 1024)} KB
-            </span>
+            {preview.size !== null && (
+              <span className="text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
+                {Math.round(preview.size / 1024)} KB
+              </span>
+            )}
             <button
               type="button"
               onClick={handleRemove}
               className="text-left text-sm font-medium text-cream-dim underline opacity-80 hover:opacity-100 light:text-ink-dim light:opacity-100"
             >
-              Trocar imagem
+              {isInitialPreview ? "Remover foto" : "Trocar imagem"}
             </button>
           </div>
         </div>

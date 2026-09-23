@@ -2,8 +2,11 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Button from "@/components/ui/Button";
+import ImageCropField from "@/components/photo/ImageCropField";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
+import { createAvatarUploadUrl } from "@/lib/api/auth";
+import { uploadBlob } from "@/lib/api/storage";
 import type { User } from "@/types/user";
 
 interface EditProfileModalProps {
@@ -16,9 +19,10 @@ interface EditProfileModalProps {
 const BIO_MAX_LENGTH = 160;
 
 export default function EditProfileModal({ open, user, onSaved, onCancel }: EditProfileModalProps) {
-  const { updateProfile } = useAuth();
+  const { updateProfile, getAccessToken } = useAuth();
   const [name, setName] = useState(user.name);
-  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? "");
+  // undefined = avatar não mexido (mantém o atual) · null = removido · Blob = novo corte aplicado
+  const [avatarBlob, setAvatarBlob] = useState<Blob | null | undefined>(undefined);
   const [bio, setBio] = useState(user.bio ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -31,7 +35,7 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
     setWasOpen(open);
     if (open) {
       setName(user.name);
-      setAvatarUrl(user.avatarUrl ?? "");
+      setAvatarBlob(undefined);
       setBio(user.bio ?? "");
       setError(null);
     }
@@ -53,11 +57,29 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
     setIsSaving(true);
     setError(null);
     try {
-      const updated = await updateProfile({
+      const patch: Partial<{ name: string; avatarUrl: string | null; bio: string | null }> = {
         name: name.trim(),
-        avatarUrl: avatarUrl.trim() || null,
         bio: bio.trim() || null,
-      });
+      };
+
+      // avatarBlob só entra no PATCH se o usuário de fato mexeu nele — omitido,
+      // o /users/me PATCH é um partial update de verdade e mantém o avatar atual.
+      if (avatarBlob !== undefined) {
+        if (avatarBlob === null) {
+          patch.avatarUrl = null;
+        } else {
+          const token = await getAccessToken();
+          if (!token) {
+            setError("Sua sessão expirou. Entre novamente para salvar.");
+            return;
+          }
+          const { uploadUrl, avatarUrl } = await createAvatarUploadUrl(avatarBlob.type, token);
+          await uploadBlob(uploadUrl, avatarBlob);
+          patch.avatarUrl = avatarUrl;
+        }
+      }
+
+      const updated = await updateProfile(patch);
       onSaved(updated);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível salvar as alterações.");
@@ -87,13 +109,17 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
             required
             className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
           />
-          <input
-            type="url"
-            value={avatarUrl}
-            onChange={(event) => setAvatarUrl(event.target.value)}
-            placeholder="URL do avatar (opcional)"
-            className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
-          />
+          <div>
+            <span className="mb-2 block text-xs font-medium text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
+              Foto de perfil
+            </span>
+            <ImageCropField
+              onImageReady={setAvatarBlob}
+              initialPreviewUrl={user.avatarUrl}
+              aspect={1}
+              cropShape="round"
+            />
+          </div>
           <div>
             <textarea
               value={bio}

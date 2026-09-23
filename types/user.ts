@@ -6,3 +6,8 @@ export interface User {
   bio: string | null;
   createdAt: string;
 }
+
+export interface AvatarUploadUrl {
+  uploadUrl: string;
+  avatarUrl: string;
+}

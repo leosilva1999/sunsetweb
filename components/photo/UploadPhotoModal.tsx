@@ -7,7 +7,8 @@ import LocationPicker from "@/components/location/LocationPicker";
 import ImageCropField from "@/components/photo/ImageCropField";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useUploadModal } from "@/lib/hooks/useUploadModal";
-import { createPhoto, createPhotoUploadUrl, uploadPhotoBlob } from "@/lib/api/photos";
+import { createPhoto, createPhotoUploadUrl } from "@/lib/api/photos";
+import { uploadBlob } from "@/lib/api/storage";
 import type { Location } from "@/types/location";
 
 export default function UploadPhotoModal() {
@@ -74,7 +75,7 @@ export default function UploadPhotoModal() {
 
       setSubmitStage("image");
       const { uploadUrl, imageUrl } = await createPhotoUploadUrl(imageBlob.type, token);
-      await uploadPhotoBlob(uploadUrl, imageBlob);
+      await uploadBlob(uploadUrl, imageBlob);
 
       setSubmitStage("photo");
       const photo = await createPhoto({ locationId: selectedLocation.id, imageUrl, caption: caption || null }, token);
