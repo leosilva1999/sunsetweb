@@ -7,11 +7,11 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
 import { createAvatarUploadUrl } from "@/lib/api/auth";
 import { uploadBlob } from "@/lib/api/storage";
-import type { User } from "@/types/user";
+import type { User, PublicUser } from "@/types/user";
 
 interface EditProfileModalProps {
   open: boolean;
-  user: User;
+  user: PublicUser;
   onSaved: (user: User) => void;
   onCancel: () => void;
 }

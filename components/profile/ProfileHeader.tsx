@@ -7,10 +7,10 @@ import { useUploadModal } from "@/lib/hooks/useUploadModal";
 import { formatDate } from "@/lib/utils/formatDate";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import EditProfileModal from "@/components/profile/EditProfileModal";
-import type { User } from "@/types/user";
+import type { PublicUser } from "@/types/user";
 
 interface ProfileHeaderProps {
-  user: User;
+  user: PublicUser;
 }
 
 export default function ProfileHeader({ user }: ProfileHeaderProps) {

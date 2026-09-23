@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { User, AvatarUploadUrl } from "@/types/user";
+import type { User, PublicUser, AvatarUploadUrl } from "@/types/user";
 import type { Photo } from "@/types/photo";
 import type { CursorPage } from "@/types/pagination";
 
@@ -39,7 +39,7 @@ export function logout(refreshToken: string) {
 }
 
 export function getUser(id: string) {
-  return apiFetch<User>(`/users/${id}`);
+  return apiFetch<PublicUser>(`/users/${id}`);
 }
 
 export function updateMe(
