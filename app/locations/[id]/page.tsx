@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocation, getLocationPhotos, getLocationRatings, getLocationSunset } from "@/lib/api/locations";
 import { formatTime } from "@/lib/utils/formatDate";
+import BackButton from "@/components/ui/BackButton";
 import PhotoGrid from "@/components/photo/PhotoGrid";
 import LocationRatings from "@/components/location/LocationRatings";
 import LocationMap from "@/components/location/LocationMap";
@@ -37,6 +38,8 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
 
   return (
     <div className="px-[5vw] py-32">
+      <BackButton />
+
       <span className="mb-2 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
         {location.city}
       </span>

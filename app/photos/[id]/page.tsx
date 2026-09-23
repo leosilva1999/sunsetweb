@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoto, getPhotoComments } from "@/lib/api/photos";
 import { getLocation } from "@/lib/api/locations";
+import BackButton from "@/components/ui/BackButton";
 import LikeButton from "@/components/photo/LikeButton";
 import PhotoActions from "@/components/photo/PhotoActions";
 import Comments from "@/components/photo/Comments";
@@ -30,26 +31,30 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
   ]);
 
   return (
-    <div className="grid grid-cols-1 gap-10 px-[5vw] py-32 lg:grid-cols-[1.4fr_1fr]">
-      <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-cover bg-center" style={{ backgroundImage: `url(${photo.imageUrl})` }}>
-        <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
-      </div>
+    <div className="px-[5vw] py-32">
+      <BackButton />
 
-      <div>
-        {location && (
-          <>
-            <span className="mb-1 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
-              {location.city}
-            </span>
-            <h1 className="mb-2 font-display text-2xl font-semibold">{location.name}</h1>
-          </>
-        )}
-        {photo.caption && <p className="mb-4 text-cream-dim light:text-ink-dim">{photo.caption}</p>}
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.4fr_1fr]">
+        <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-cover bg-center" style={{ backgroundImage: `url(${photo.imageUrl})` }}>
+          <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
+        </div>
 
-        <PhotoActions photo={photo} />
+        <div>
+          {location && (
+            <>
+              <span className="mb-1 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
+                {location.city}
+              </span>
+              <h1 className="mb-2 font-display text-2xl font-semibold">{location.name}</h1>
+            </>
+          )}
+          {photo.caption && <p className="mb-4 text-cream-dim light:text-ink-dim">{photo.caption}</p>}
 
-        <h2 className="mb-4 font-display text-lg font-semibold">Comentários</h2>
-        <Comments photoId={photo.id} initialPage={comments} />
+          <PhotoActions photo={photo} />
+
+          <h2 className="mb-4 font-display text-lg font-semibold">Comentários</h2>
+          <Comments photoId={photo.id} initialPage={comments} />
+        </div>
       </div>
     </div>
   );
