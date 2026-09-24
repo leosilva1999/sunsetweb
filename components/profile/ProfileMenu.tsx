@@ -2,17 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import KebabMenu from "@/components/ui/KebabMenu";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { getUserPhotos } from "@/lib/api/auth";
 import type { PublicUser } from "@/types/user";
 import type { Photo } from "@/types/photo";
 
-interface DeleteAccountSectionProps {
+interface ProfileMenuProps {
   user: PublicUser;
 }
 
-export default function DeleteAccountSection({ user }: DeleteAccountSectionProps) {
+const menuItemClass =
+  "block w-full px-4 py-2.5 text-left text-sm font-medium opacity-85 hover:opacity-100 hover:bg-white/5 disabled:opacity-40 light:hover:bg-black/5";
+
+export default function ProfileMenu({ user }: ProfileMenuProps) {
   const { deleteAccount } = useAuth();
   const router = useRouter();
   const [isExporting, setIsExporting] = useState(false);
@@ -64,21 +68,17 @@ export default function DeleteAccountSection({ user }: DeleteAccountSectionProps
   };
 
   return (
-    <div className="mt-8 flex flex-col items-center gap-2 border-t border-white/8 pt-6 text-xs sm:items-start light:border-line">
-      <div className="flex gap-4">
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={isExporting}
-          className="text-cream-dim underline opacity-70 hover:opacity-100 disabled:opacity-40 light:text-ink-dim light:opacity-100"
-        >
+    <div className="relative">
+      <KebabMenu label="Mais opções da conta">
+        <button type="button" onClick={handleExport} disabled={isExporting} className={menuItemClass}>
           {isExporting ? "Gerando arquivo..." : "Baixar meus dados"}
         </button>
-        <button type="button" onClick={() => setIsDeleteOpen(true)} className="text-sun-deep underline opacity-80 hover:opacity-100">
+        <button type="button" onClick={() => setIsDeleteOpen(true)} className={`${menuItemClass} text-sun-deep`}>
           Excluir minha conta
         </button>
-      </div>
-      {error && <p className="text-sun-deep">{error}</p>}
+      </KebabMenu>
+
+      {error && <p className="absolute top-full right-0 mt-2 w-48 text-right text-xs text-sun-deep">{error}</p>}
 
       <ConfirmDialog
         open={isDeleteOpen}
