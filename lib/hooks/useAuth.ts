@@ -131,6 +131,14 @@ export function useAuth() {
     [getAccessToken],
   );
 
+  const deleteAccount = useCallback(async () => {
+    const token = await getAccessToken();
+    if (!token) throw new Error("not authenticated");
+
+    await authApi.deleteMe(token);
+    writeAuth(null);
+  }, [getAccessToken]);
+
   return {
     user: auth?.user ?? null,
     token: auth?.accessToken ?? null,
@@ -140,5 +148,6 @@ export function useAuth() {
     logout,
     getAccessToken,
     updateProfile,
+    deleteAccount,
   };
 }

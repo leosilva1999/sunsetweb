@@ -53,6 +53,10 @@ export function updateMe(
   });
 }
 
+export function deleteMe(token: string) {
+  return apiFetch<void>("/users/me", { method: "DELETE", token });
+}
+
 export function createAvatarUploadUrl(contentType: string, token: string) {
   return apiFetch<AvatarUploadUrl>("/users/me/avatar-upload-url", {
     method: "POST",
