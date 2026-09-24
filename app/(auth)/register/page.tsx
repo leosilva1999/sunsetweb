@@ -80,6 +80,24 @@ function RegisterForm() {
           minLength={8}
           className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
         />
+        <label className="flex items-start gap-2.5 text-sm text-cream-dim light:text-ink-dim">
+          <input
+            type="checkbox"
+            required
+            className="mt-0.5 h-4 w-4 shrink-0 accent-sun-core"
+          />
+          <span>
+            Li e aceito os{" "}
+            <Link href="/termos" target="_blank" className="underline">
+              Termos de Uso
+            </Link>{" "}
+            e a{" "}
+            <Link href="/privacidade" target="_blank" className="underline">
+              Política de Privacidade
+            </Link>
+            .
+          </span>
+        </label>
         {error && <p className="text-sm text-sun-deep">{error}</p>}
         <Button type="submit" variant="accent" disabled={isSubmitting}>
           {isSubmitting ? "Criando..." : "Criar conta"}
