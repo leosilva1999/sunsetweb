@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getTerms } from "@/lib/api/terms";
+import { getTerms } from "@/lib/api/legalDocuments";
 import { formatDate } from "@/lib/utils/formatDate";
 
 export const metadata: Metadata = { title: "Termos de Uso — Sunset" };
