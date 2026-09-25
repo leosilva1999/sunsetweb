@@ -6,13 +6,16 @@ import Tabs from "@/components/ui/Tabs";
 import ReportsQueue from "@/components/moderation/ReportsQueue";
 import LegalDocumentEditor from "@/components/moderation/LegalDocumentEditor";
 import UserRoleManager from "@/components/moderation/UserRoleManager";
+import ModerationHistory from "@/components/moderation/ModerationHistory";
 import { useAuth, hasStoredAuth } from "@/lib/hooks/useAuth";
 
 const REPORTS_TAB = "Denúncias";
+const HISTORY_TAB = "Histórico";
 const TERMS_TAB = "Termos de Uso";
 const PRIVACY_TAB = "Política de Privacidade";
 const USERS_TAB = "Usuários";
-const ADMIN_TABS = [REPORTS_TAB, TERMS_TAB, PRIVACY_TAB, USERS_TAB];
+const MODERATOR_TABS = [REPORTS_TAB, HISTORY_TAB];
+const ADMIN_TABS = [REPORTS_TAB, HISTORY_TAB, TERMS_TAB, PRIVACY_TAB, USERS_TAB];
 
 export default function ModerationDashboard() {
   const { user } = useAuth();
@@ -37,12 +40,13 @@ export default function ModerationDashboard() {
   if (!user || user.role === "User") return null;
 
   const isAdmin = user.role === "Admin";
-  const visibleTabs = isAdmin ? ADMIN_TABS : [REPORTS_TAB];
+  const visibleTabs = isAdmin ? ADMIN_TABS : MODERATOR_TABS;
 
   return (
     <div>
       <Tabs options={visibleTabs} active={activeTab} onChange={setActiveTab} />
       {activeTab === REPORTS_TAB && <ReportsQueue />}
+      {activeTab === HISTORY_TAB && <ModerationHistory />}
       {isAdmin && activeTab === TERMS_TAB && <LegalDocumentEditor documentType="TermsOfService" />}
       {isAdmin && activeTab === PRIVACY_TAB && <LegalDocumentEditor documentType="PrivacyPolicy" />}
       {isAdmin && activeTab === USERS_TAB && <UserRoleManager />}

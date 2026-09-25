@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { Report, ReportTargetType, ReportReason, ReportStatus } from "@/types/report";
+import type { Report, ReportTargetType, ReportReason, ReportStatus, ModerationAction } from "@/types/report";
 import type { User, UserRole } from "@/types/user";
 import type { CursorPage } from "@/types/pagination";
 
@@ -51,4 +51,13 @@ export function changeUserRole(userId: string, role: UserRole, token: string) {
     body: JSON.stringify({ role }),
     token,
   });
+}
+
+export function getModerationActions(token: string, cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<CursorPage<ModerationAction>>(`/moderation/actions${suffix}`, { token });
 }
