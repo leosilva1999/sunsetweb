@@ -8,10 +8,13 @@ export interface PublicUser {
   createdAt: string;
 }
 
+export type UserRole = "User" | "Moderator" | "Admin";
+
 // Forma autenticada - só vem de login/register/refresh e PATCH /users/me, quando é o
-// próprio usuário vendo os próprios dados.
+// próprio usuário vendo os próprios dados (e de GET /moderation/users, Admin-only).
 export interface User extends PublicUser {
   email: string;
+  role: UserRole;
 }
 
 export interface AvatarUploadUrl {

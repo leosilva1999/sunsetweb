@@ -61,6 +61,11 @@ export default function Navbar() {
           <button onClick={handleUploadClick} className="opacity-85 hover:opacity-100">
             Postar foto
           </button>
+          {user && user.role !== "User" && (
+            <Link href="/moderation" className="opacity-85 hover:opacity-100">
+              Moderação
+            </Link>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />

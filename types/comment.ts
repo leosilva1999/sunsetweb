@@ -1,5 +1,6 @@
 export interface Comment {
   id: string;
+  photoId: string;
   userId: string;
   userName: string;
   userAvatarUrl: string | null;

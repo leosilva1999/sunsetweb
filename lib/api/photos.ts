@@ -64,6 +64,10 @@ export function createComment(id: string, content: string, token: string, parent
   });
 }
 
+export function getComment(id: string) {
+  return apiFetch<Comment>(`/comments/${id}`);
+}
+
 export function deleteComment(id: string, token: string) {
   return apiFetch<void>(`/comments/${id}`, { method: "DELETE", token });
 }

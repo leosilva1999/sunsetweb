@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { formatDate } from "@/lib/utils/formatDate";
 import CommentForm from "@/components/photo/CommentForm";
+import ReportDialog from "@/components/moderation/ReportDialog";
 import type { Comment } from "@/types/comment";
 import type { RepliesState } from "@/lib/hooks/useComments";
 
@@ -134,13 +135,21 @@ function CommentHeader({ comment, currentUserId, onDelete, compact }: CommentHea
       <span className="font-mono text-xs text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
         {formatDate(comment.createdAt)}
       </span>
-      {comment.userId === currentUserId && (
+      {comment.userId === currentUserId ? (
         <button
           onClick={() => onDelete(comment)}
           className="ml-auto text-xs text-cream-dim opacity-60 hover:text-sun-deep hover:opacity-100 light:text-ink-dim light:opacity-100"
         >
           Excluir
         </button>
+      ) : (
+        currentUserId && (
+          <ReportDialog
+            targetType="Comment"
+            targetId={comment.id}
+            triggerClassName="ml-auto text-xs text-cream-dim opacity-60 hover:text-sun-deep hover:opacity-100 light:text-ink-dim light:opacity-100"
+          />
+        )
       )}
     </div>
   );

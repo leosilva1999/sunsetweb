@@ -43,6 +43,7 @@ export function useComments(photoId: string, initialPage: CursorPage<Comment>) {
     const tempId = makeTempId();
     const optimistic: Comment = {
       id: tempId,
+      photoId,
       userId: user.id,
       userName: user.name,
       userAvatarUrl: user.avatarUrl,
@@ -76,6 +77,7 @@ export function useComments(photoId: string, initialPage: CursorPage<Comment>) {
 
     const optimistic: Comment = {
       id: tempId,
+      photoId,
       userId: user.id,
       userName: user.name,
       userAvatarUrl: user.avatarUrl,

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import ReportDialog from "@/components/moderation/ReportDialog";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { deletePhoto } from "@/lib/api/photos";
 import type { Photo } from "@/types/photo";
@@ -11,6 +12,9 @@ interface PhotoActionsProps {
   photo: Photo;
 }
 
+const reportTriggerClassName =
+  "inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium opacity-85 hover:opacity-100 light:border-ink/15";
+
 export default function PhotoActions({ photo }: PhotoActionsProps) {
   const { user, getAccessToken } = useAuth();
   const router = useRouter();
@@ -18,7 +22,15 @@ export default function PhotoActions({ photo }: PhotoActionsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (user?.id !== photo.userId) return null;
+  if (!user) return null;
+
+  if (user.id !== photo.userId) {
+    return (
+      <div className="mb-8">
+        <ReportDialog targetType="Photo" targetId={photo.id} triggerClassName={reportTriggerClassName} />
+      </div>
+    );
+  }
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
