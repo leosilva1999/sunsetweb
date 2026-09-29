@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
+import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
 import { safeRedirectPath } from "@/lib/utils/safeRedirectPath";
@@ -12,7 +13,7 @@ import { safeRedirectPath } from "@/lib/utils/safeRedirectPath";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,16 @@ function LoginForm() {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleCredential = async (idToken: string) => {
+    setError(null);
+    try {
+      await loginWithGoogle(idToken);
+      router.push(safeRedirectPath(searchParams.get("redirect")));
+    } catch {
+      setError("Não foi possível entrar com o Google agora. Tente novamente.");
     }
   };
 
@@ -73,6 +84,23 @@ function LoginForm() {
           {isSubmitting ? "Entrando..." : "Entrar"}
         </Button>
       </form>
+      <div className="my-6 flex items-center gap-3">
+        <span className="h-px flex-1 bg-white/15 light:bg-ink/15" />
+        <span className="text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">ou</span>
+        <span className="h-px flex-1 bg-white/15 light:bg-ink/15" />
+      </div>
+      <GoogleSignInButton onCredential={handleGoogleCredential} />
+      <p className="mt-4 text-center text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
+        Ao continuar com o Google, você concorda com os{" "}
+        <Link href="/termos" target="_blank" className="underline">
+          Termos de Uso
+        </Link>{" "}
+        e a{" "}
+        <Link href="/privacidade" target="_blank" className="underline">
+          Política de Privacidade
+        </Link>
+        .
+      </p>
       <p className="mt-6 text-sm text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
         Não tem conta?{" "}
         <Link

@@ -96,6 +96,12 @@ export function useAuth() {
     return result;
   }, []);
 
+  const loginWithGoogle = useCallback(async (idToken: string) => {
+    const result = await authApi.loginWithGoogle(idToken);
+    writeAuth(result);
+    return result;
+  }, []);
+
   const logout = useCallback(async () => {
     if (auth) {
       await authApi.logout(auth.refreshToken).catch(() => {});
@@ -145,6 +151,7 @@ export function useAuth() {
     isAuthenticated: auth !== null,
     login,
     register,
+    loginWithGoogle,
     logout,
     getAccessToken,
     updateProfile,

@@ -24,6 +24,13 @@ export function login(data: { email: string; password: string }) {
   });
 }
 
+export function loginWithGoogle(idToken: string) {
+  return apiFetch<AuthResponse>("/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ idToken }),
+  });
+}
+
 export function refresh(refreshToken: string) {
   return apiFetch<AuthResponse>("/auth/refresh", {
     method: "POST",
