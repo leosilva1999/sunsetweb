@@ -79,6 +79,12 @@ function LoginForm() {
           required
           className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
         />
+        <Link
+          href="/forgot-password"
+          className="-mt-3 self-end text-xs text-cream-dim opacity-70 underline light:text-ink-dim light:opacity-100"
+        >
+          Esqueci minha senha
+        </Link>
         {error && <p className="text-sm text-sun-deep">{error}</p>}
         <Button type="submit" variant="accent" disabled={isSubmitting}>
           {isSubmitting ? "Entrando..." : "Entrar"}

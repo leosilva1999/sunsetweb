@@ -31,6 +31,20 @@ export function loginWithGoogle(idToken: string) {
   });
 }
 
+export function forgotPassword(email: string) {
+  return apiFetch<void>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token: string, newPassword: string) {
+  return apiFetch<void>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, newPassword }),
+  });
+}
+
 export function refresh(refreshToken: string) {
   return apiFetch<AuthResponse>("/auth/refresh", {
     method: "POST",
