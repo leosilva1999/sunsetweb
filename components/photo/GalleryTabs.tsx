@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Tabs from "@/components/ui/Tabs";
-import PhotoGrid, { type PhotoGridItem } from "@/components/photo/PhotoGrid";
+import PhotoGrid from "@/components/photo/PhotoGrid";
 import { getPhotos } from "@/lib/api/photos";
+import type { Photo } from "@/types/photo";
 
 const RECENT_TAB = "Recentes";
 const TOP_TAB = "Mais curtidas";
@@ -18,7 +19,7 @@ const TAB_SORT: Record<string, "recent" | "top"> = {
 const GALLERY_LIMIT = 5;
 
 interface GalleryTabsProps {
-  initialItems: PhotoGridItem[];
+  initialItems: Photo[];
 }
 
 export default function GalleryTabs({ initialItems }: GalleryTabsProps) {
@@ -34,7 +35,7 @@ export default function GalleryTabs({ initialItems }: GalleryTabsProps) {
     setIsLoading(true);
     try {
       const page = await getPhotos(sort, undefined, GALLERY_LIMIT);
-      setItems(page.items.map((photo) => ({ photo, locationName: photo.locationName, city: "" })));
+      setItems(page.items);
     } catch {
       // mantém a lista anterior em caso de falha
     } finally {

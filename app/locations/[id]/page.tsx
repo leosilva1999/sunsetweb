@@ -81,13 +81,7 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
       {photos.items.length === 0 ? (
         <p className="text-sm text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">Ainda não há fotos deste local.</p>
       ) : (
-        <PhotoGrid
-          items={photos.items.map((photo) => ({
-            photo,
-            locationName: location.name,
-            city: location.city,
-          }))}
-        />
+        <PhotoGrid items={photos.items} />
       )}
 
       <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Avaliações</h2>

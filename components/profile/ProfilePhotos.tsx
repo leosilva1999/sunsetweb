@@ -23,13 +23,7 @@ export default function ProfilePhotos({ userId, initialPage }: ProfilePhotosProp
 
   return (
     <div>
-      <PhotoGrid
-        items={photos.map((photo) => ({
-          photo,
-          locationName: photo.locationName,
-          city: "",
-        }))}
-      />
+      <PhotoGrid items={photos} />
       {hasMore && (
         <button
           onClick={loadMore}

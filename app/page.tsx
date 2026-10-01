@@ -4,7 +4,6 @@ import GalleryTabs from "@/components/photo/GalleryTabs";
 import UploadCtaButton from "@/components/photo/UploadCtaButton";
 import { getLocationRanking } from "@/lib/api/locations";
 import { getPhotos } from "@/lib/api/photos";
-import type { PhotoGridItem } from "@/components/photo/PhotoGrid";
 
 // Sem searchParams/cookies, a home seria pré-renderizada estática no build e
 // congelaria o ranking/fotos recentes daquele momento — revalida periodicamente
@@ -16,12 +15,6 @@ export default async function HomePage() {
     getLocationRanking("week", 4).catch(() => []),
     getPhotos("recent", undefined, 5).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
   ]);
-
-  const galleryItems: PhotoGridItem[] = photosPage.items.map((photo) => ({
-    photo,
-    locationName: photo.locationName,
-    city: "",
-  }));
 
   return (
     <>
@@ -84,7 +77,7 @@ export default async function HomePage() {
             </h2>
           </div>
         </div>
-        <GalleryTabs initialItems={galleryItems} />
+        <GalleryTabs initialItems={photosPage.items} />
       </section>
 
       <section

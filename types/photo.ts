@@ -5,6 +5,7 @@ export interface Photo {
   userAvatarUrl: string | null;
   locationId: string;
   locationName: string;
+  city: string;
   imageUrl: string;
   caption: string | null;
   likesCount: number;
