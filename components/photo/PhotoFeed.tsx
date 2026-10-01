@@ -32,7 +32,7 @@ export default function PhotoFeed({ initialSort, initialPage }: PhotoFeedProps) 
           {isChangingSort ? "Carregando..." : "Ainda não há fotos por aqui."}
         </p>
       ) : (
-        <PhotoGrid items={photos} />
+        <PhotoGrid items={photos} showAds />
       )}
       {hasMore && (
         <button
