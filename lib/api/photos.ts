@@ -12,6 +12,10 @@ export function getPhotos(sort: "recent" | "top" = "recent", cursor?: string, li
   return apiFetch<CursorPage<Photo>>(`/photos?${query}`);
 }
 
+export function getPhotoCount() {
+  return apiFetch<{ count: number }>("/photos/count");
+}
+
 export function getPhoto(id: string, token?: string | null) {
   return apiFetch<Photo>(`/photos/${id}`, { token });
 }

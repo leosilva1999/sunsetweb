@@ -3,7 +3,7 @@ import RankingList from "@/components/location/RankingList";
 import GalleryTabs from "@/components/photo/GalleryTabs";
 import UploadCtaButton from "@/components/photo/UploadCtaButton";
 import { getLocationRanking } from "@/lib/api/locations";
-import { getPhotos } from "@/lib/api/photos";
+import { getPhotos, getPhotoCount } from "@/lib/api/photos";
 
 // Sem searchParams/cookies, a home seria pré-renderizada estática no build e
 // congelaria o ranking/fotos recentes daquele momento — revalida periodicamente
@@ -11,9 +11,10 @@ import { getPhotos } from "@/lib/api/photos";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [ranking, photosPage] = await Promise.all([
+  const [ranking, photosPage, photoCount] = await Promise.all([
     getLocationRanking("week", 4).catch(() => []),
     getPhotos("recent", undefined, 5).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
+    getPhotoCount().catch(() => null),
   ]);
 
   return (
@@ -24,9 +25,11 @@ export default async function HomePage() {
         <div className="absolute inset-x-0 bottom-0 h-[16%] bg-dusk-950 opacity-100 [clip-path:polygon(0_40%,12%_30%,26%_45%,40%_20%,55%_38%,68%_15%,82%_34%,100%_22%,100%_100%,0_100%)] light:bg-dusk-900 light:opacity-90" />
 
         <div className="relative z-[5] max-w-[900px] px-[5vw] pb-16">
-          <span className="mb-4.5 block font-mono text-xs tracking-[0.14em] text-cream/75 uppercase light:text-dusk-950/75">
-            18.402 pôr do sol catalogados
-          </span>
+          {photoCount && (
+            <span className="mb-4.5 block font-mono text-xs tracking-[0.14em] text-cream/75 uppercase light:text-dusk-950/75">
+              {photoCount.count.toLocaleString("pt-BR")} pôr do sol catalogados
+            </span>
+          )}
           <h1 className="mb-5.5 font-display text-[clamp(2.6rem,6.5vw,5.2rem)] leading-[0.98] tracking-[-0.01em] text-dusk-950">
             Encontre o
             <br />
