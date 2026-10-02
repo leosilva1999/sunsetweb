@@ -51,12 +51,23 @@ export default function UserMenu({ user }: UserMenuProps) {
         onClick={() => setIsOpen((open) => !open)}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className="flex items-center gap-1.5 text-sm font-medium opacity-85 hover:opacity-100"
+        aria-label={`Menu da conta de ${user.name}`}
+        className="hidden items-center gap-1.5 text-sm font-medium opacity-85 hover:opacity-100 md:flex"
       >
         {user.name}
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
           <path d="M6 9l6 6 6-6" />
         </svg>
+      </button>
+      <button
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label={`Menu da conta de ${user.name}`}
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-cream/15 font-mono text-sm font-medium md:hidden light:bg-ink/10"
+      >
+        {user.name.charAt(0).toUpperCase()}
       </button>
 
       {isOpen && (

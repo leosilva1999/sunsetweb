@@ -4,14 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import UserMenu from "@/components/layout/UserMenu";
+import MobileMenu from "@/components/layout/MobileMenu";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function Navbar() {
   const { user, isAuthenticated } = useAuth();
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between bg-gradient-to-b from-dusk-950/85 to-transparent px-[5vw] py-5 backdrop-blur-[2px] light:from-paper/90">
-      <Link href="/" className="flex items-center">
+    <nav className="fixed inset-x-0 top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-gradient-to-b from-dusk-950/85 to-transparent px-[5vw] py-5 backdrop-blur-[2px] md:flex md:justify-between light:from-paper/90">
+      <MobileMenu />
+
+      <Link href="/" className="flex items-center justify-self-center md:justify-self-auto">
         {/* SVGs locais - unoptimized evita a exigência de dangerouslyAllowSVG no config só pra um logo vetorial que já é pequeno. */}
         <Image src="/images/logo-horizontal.svg" alt="Sunset" width={400} height={100} unoptimized priority className="h-8 w-auto light:hidden" />
         <Image
@@ -24,6 +27,7 @@ export default function Navbar() {
           className="hidden h-8 w-auto light:block"
         />
       </Link>
+
       <div className="hidden gap-8 text-sm font-medium md:flex">
         <Link href="/ranking" className="opacity-85 hover:opacity-100">
           Rankings
@@ -35,8 +39,11 @@ export default function Navbar() {
           Feed
         </Link>
       </div>
-      <div className="flex items-center gap-3">
-        <ThemeToggle />
+
+      <div className="flex items-center justify-self-end gap-3 md:justify-self-auto">
+        <div className="hidden md:flex">
+          <ThemeToggle />
+        </div>
         {isAuthenticated && user ? (
           <UserMenu user={user} />
         ) : (
