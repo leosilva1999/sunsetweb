@@ -10,15 +10,18 @@ interface PhotoCardProps {
 
 export default function PhotoCard({ photo, big }: PhotoCardProps) {
   return (
-    <Link
-      href={`/photos/${photo.id}`}
+    <div
       className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 light:border-line light:shadow-[0_2px_10px_rgba(74,43,99,0.05)] ${big ? "col-span-2 row-span-2" : ""}`}
     >
-      <div className="relative min-h-0 flex-1 bg-cover bg-center" style={{ backgroundImage: `url(${photo.imageUrl})` }}>
+      <Link
+        href={`/photos/${photo.id}`}
+        className="relative block min-h-0 flex-1 bg-cover bg-center"
+        style={{ backgroundImage: `url(${photo.imageUrl})` }}
+      >
         <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
-      </div>
+      </Link>
       <div className="flex items-start justify-between gap-2.5 bg-dusk-900 px-3.5 py-2.5 light:bg-card">
-        <div className="flex min-w-0 items-start gap-2">
+        <Link href={`/profile/${photo.userId}`} className="flex min-w-0 items-start gap-2 hover:opacity-80">
           {photo.userAvatarUrl ? (
             // unoptimized: avatarUrl é uma URL arbitrária que o próprio usuário escolhe
             // (ver EditProfileModal) - não dá pra colocar todo host possível em
@@ -39,7 +42,7 @@ export default function PhotoCard({ photo, big }: PhotoCardProps) {
           )}
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">
-              {photo.userName} em {photo.locationName}, {photo.city}
+              {photo.userName} <span className="font-normal opacity-85">em {photo.locationName}, {photo.city}</span>
             </p>
             {photo.caption && (
               <p className="truncate text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
@@ -47,12 +50,15 @@ export default function PhotoCard({ photo, big }: PhotoCardProps) {
               </p>
             )}
           </div>
-        </div>
-        <div className="flex shrink-0 gap-2.5 pt-0.5 font-mono text-xs text-cream-dim opacity-85 light:text-ink-dim light:opacity-100">
+        </Link>
+        <Link
+          href={`/photos/${photo.id}`}
+          className="flex shrink-0 gap-2.5 pt-0.5 font-mono text-xs text-cream-dim opacity-85 hover:opacity-100 light:text-ink-dim light:opacity-100"
+        >
           <span className="flex items-center gap-1">❤ {photo.likesCount}</span>
           <span className="flex items-center gap-1">💬 {photo.commentsCount}</span>
-        </div>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }

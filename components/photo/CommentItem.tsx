@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { formatDate } from "@/lib/utils/formatDate";
 import CommentForm from "@/components/photo/CommentForm";
 import ReportDialog from "@/components/moderation/ReportDialog";
@@ -113,25 +114,27 @@ function CommentHeader({ comment, currentUserId, onDelete, compact }: CommentHea
   const sizePx = compact ? 24 : 28;
   return (
     <div className="mb-1.5 flex items-center gap-2.5">
-      {comment.userAvatarUrl ? (
-        // unoptimized: avatarUrl é uma URL arbitrária que o próprio usuário escolhe
-        // (ver EditProfileModal) - não dá pra colocar todo host possível em
-        // remotePatterns, e permitir qualquer host lá seria abrir um proxy de
-        // imagens pro servidor buscar URLs arbitrárias de terceiros.
-        <Image
-          src={comment.userAvatarUrl}
-          alt=""
-          width={sizePx}
-          height={sizePx}
-          unoptimized
-          className={`${size} rounded-full object-cover`}
-        />
-      ) : (
-        <span className={`flex ${size} items-center justify-center rounded-full bg-cream/15 font-mono text-xs light:bg-ink/10`}>
-          {comment.userName.charAt(0).toUpperCase()}
-        </span>
-      )}
-      <span className="font-medium">{comment.userName}</span>
+      <Link href={`/profile/${comment.userId}`} className="flex items-center gap-2.5 hover:opacity-80">
+        {comment.userAvatarUrl ? (
+          // unoptimized: avatarUrl é uma URL arbitrária que o próprio usuário escolhe
+          // (ver EditProfileModal) - não dá pra colocar todo host possível em
+          // remotePatterns, e permitir qualquer host lá seria abrir um proxy de
+          // imagens pro servidor buscar URLs arbitrárias de terceiros.
+          <Image
+            src={comment.userAvatarUrl}
+            alt=""
+            width={sizePx}
+            height={sizePx}
+            unoptimized
+            className={`${size} rounded-full object-cover`}
+          />
+        ) : (
+          <span className={`flex ${size} items-center justify-center rounded-full bg-cream/15 font-mono text-xs light:bg-ink/10`}>
+            {comment.userName.charAt(0).toUpperCase()}
+          </span>
+        )}
+        <span className="font-medium">{comment.userName}</span>
+      </Link>
       <span className="font-mono text-xs text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
         {formatDate(comment.createdAt)}
       </span>

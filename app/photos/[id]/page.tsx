@@ -5,6 +5,7 @@ import { getLocation } from "@/lib/api/locations";
 import BackButton from "@/components/ui/BackButton";
 import LikeButton from "@/components/photo/LikeButton";
 import PhotoActions from "@/components/photo/PhotoActions";
+import PhotoAuthor from "@/components/photo/PhotoAuthor";
 import Comments from "@/components/photo/Comments";
 
 export async function generateMetadata({ params }: PageProps<"/photos/[id]">): Promise<Metadata> {
@@ -40,6 +41,8 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
         </div>
 
         <div>
+          <PhotoAuthor userId={photo.userId} userName={photo.userName} userAvatarUrl={photo.userAvatarUrl} />
+
           {location && (
             <>
               <span className="mb-1 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
