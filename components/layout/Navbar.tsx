@@ -5,6 +5,7 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import UserMenu from "@/components/layout/UserMenu";
 import MobileMenu from "@/components/layout/MobileMenu";
+import NotificationBell from "@/components/layout/NotificationBell";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function Navbar() {
@@ -45,7 +46,10 @@ export default function Navbar() {
           <ThemeToggle />
         </div>
         {isAuthenticated && user ? (
-          <UserMenu user={user} />
+          <>
+            <NotificationBell />
+            <UserMenu user={user} />
+          </>
         ) : (
           <Link
             href="/login"
