@@ -5,6 +5,9 @@ export interface PublicUser {
   name: string;
   avatarUrl: string | null;
   bio: string | null;
+  followersCount: number;
+  followingCount: number;
+  isFollowedByCurrentUser: boolean;
   createdAt: string;
 }
 
@@ -12,6 +15,9 @@ export type UserRole = "User" | "Moderator" | "Admin";
 
 // Forma autenticada - só vem de login/register/refresh e PATCH /users/me, quando é o
 // próprio usuário vendo os próprios dados (e de GET /moderation/users, Admin-only).
+// ⚠️ O backend (UserResponse) NÃO inclui followersCount/followingCount/
+// isFollowedByCurrentUser nessa forma (só PublicUserResponse tem) - não leia esses três
+// campos de um User vindo de useAuth(); leia do PublicUser retornado por getUser(id).
 export interface User extends PublicUser {
   email: string;
   role: UserRole;

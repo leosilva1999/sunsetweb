@@ -63,6 +63,32 @@ export function getUser(id: string) {
   return apiFetch<PublicUser>(`/users/${id}`);
 }
 
+export function followUser(id: string, token: string) {
+  return apiFetch<void>(`/users/${id}/follow`, { method: "POST", token });
+}
+
+export function unfollowUser(id: string, token: string) {
+  return apiFetch<void>(`/users/${id}/follow`, { method: "DELETE", token });
+}
+
+export function getUserFollowers(id: string, cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<CursorPage<PublicUser>>(`/users/${id}/followers${suffix}`);
+}
+
+export function getUserFollowing(id: string, cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<CursorPage<PublicUser>>(`/users/${id}/following${suffix}`);
+}
+
 export function updateMe(
   data: Partial<{ name: string; avatarUrl: string | null; bio: string | null }>,
   token: string,

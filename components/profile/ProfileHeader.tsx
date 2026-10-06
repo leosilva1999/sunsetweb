@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useUploadModal } from "@/lib/hooks/useUploadModal";
 import { formatDate } from "@/lib/utils/formatDate";
 import EditProfileModal from "@/components/profile/EditProfileModal";
 import ProfileMenu from "@/components/profile/ProfileMenu";
+import FollowButton from "@/components/profile/FollowButton";
 import type { PublicUser } from "@/types/user";
 
 interface ProfileHeaderProps {
@@ -40,6 +42,16 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
         <div className="mt-1.5 font-mono text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
           Entrou em {formatDate(displayedUser.createdAt)}
         </div>
+        <div className="mt-2 flex items-center justify-center gap-4 text-sm sm:justify-start">
+          <Link href={`/profile/${user.id}/followers`} className="opacity-85 hover:opacity-100">
+            <strong className="font-semibold">{user.followersCount}</strong>{" "}
+            <span className="text-cream-dim light:text-ink-dim">seguidores</span>
+          </Link>
+          <Link href={`/profile/${user.id}/following`} className="opacity-85 hover:opacity-100">
+            <strong className="font-semibold">{user.followingCount}</strong>{" "}
+            <span className="text-cream-dim light:text-ink-dim">seguindo</span>
+          </Link>
+        </div>
         {displayedUser.bio ? (
           <p className="mt-3 max-w-md text-sm text-cream-dim light:text-ink-dim">{displayedUser.bio}</p>
         ) : (
@@ -66,6 +78,12 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
             Editar perfil
           </button>
           <ProfileMenu user={displayedUser} />
+        </div>
+      )}
+
+      {!isOwnProfile && (
+        <div className="flex items-center gap-3">
+          <FollowButton userId={user.id} initialFollowing={user.isFollowedByCurrentUser} />
         </div>
       )}
 
