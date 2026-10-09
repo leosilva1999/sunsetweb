@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PhotoFeed from "@/components/photo/PhotoFeed";
 import { getPhotos } from "@/lib/api/photos";
 
-export const metadata: Metadata = { title: "Fotos — Sunset" };
+export const metadata: Metadata = { title: "Fotos — Sunsetsss" };
 
 // Sem searchParams/cookies, essa página seria estática e congelaria as fotos
 // do momento do build — revalida periodicamente em vez de exigir um redeploy.

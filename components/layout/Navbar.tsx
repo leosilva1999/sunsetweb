@@ -16,17 +16,7 @@ export default function Navbar() {
       <MobileMenu />
 
       <Link href="/" className="flex items-center justify-self-center md:justify-self-auto">
-        {/* SVGs locais - unoptimized evita a exigência de dangerouslyAllowSVG no config só pra um logo vetorial que já é pequeno. */}
-        <Image src="/images/logo-horizontal.svg" alt="Sunset" width={400} height={100} unoptimized priority className="h-8 w-auto light:hidden" />
-        <Image
-          src="/images/logo-horizontal-light.svg"
-          alt="Sunset"
-          width={400}
-          height={100}
-          unoptimized
-          priority
-          className="hidden h-8 w-auto light:block"
-        />
+        <Image src="/images/logo-horizontal.png" alt="Sunsetsss" width={400} height={100} priority className="h-8 w-auto" />
       </Link>
 
       <div className="hidden gap-8 text-sm font-medium md:flex">

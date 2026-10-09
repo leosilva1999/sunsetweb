@@ -25,7 +25,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sunset — Encontre o melhor pôr do sol",
+  title: "Sunsetsss — Encontre o melhor pôr do sol",
   description:
     "Pesquise locais com as mais bonitas visões de pôr do sol, poste fotos, curta, comente e avalie os locais.",
 };

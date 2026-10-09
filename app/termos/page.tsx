@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getTerms } from "@/lib/api/legalDocuments";
 import { formatDate } from "@/lib/utils/formatDate";
 
-export const metadata: Metadata = { title: "Termos de Uso — Sunset" };
+export const metadata: Metadata = { title: "Termos de Uso — Sunsetsss" };
 
 // Sem searchParams/cookies, a página seria pré-renderizada estática no build e
 // congelaria os termos vigentes naquele momento — revalida periodicamente em vez

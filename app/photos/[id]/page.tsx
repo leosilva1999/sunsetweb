@@ -12,9 +12,9 @@ export async function generateMetadata({ params }: PageProps<"/photos/[id]">): P
   const { id } = await params;
   try {
     const photo = await getPhoto(id);
-    return { title: photo.caption ? `${photo.caption} — Sunset` : "Foto — Sunset" };
+    return { title: photo.caption ? `${photo.caption} — Sunsetsss` : "Foto — Sunsetsss" };
   } catch {
-    return { title: "Foto — Sunset" };
+    return { title: "Foto — Sunsetsss" };
   }
 }
 

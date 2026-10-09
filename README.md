@@ -1,6 +1,6 @@
-# Sunset
+# Sunsetsss
 
-Sunset é uma plataforma onde usuários pesquisam locais com as mais bonitas visões de pôr do sol, postam fotos marcando o local, curtem, comentam e avaliam os locais para gerar rankings.
+Sunsetsss é uma plataforma onde usuários pesquisam locais com as mais bonitas visões de pôr do sol, postam fotos marcando o local, curtem, comentam e avaliam os locais para gerar rankings.
 
 Este repositório é o **front-end** (Next.js / React), que consome a [Sunset.API](../../dotnet/sunsetapi) (.NET 9).
 

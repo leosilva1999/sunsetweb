@@ -12,11 +12,11 @@ export async function generateMetadata({ params }: PageProps<"/locations/[id]">)
   try {
     const location = await getLocation(id);
     return {
-      title: `${location.name} — Sunset`,
+      title: `${location.name} — Sunsetsss`,
       description: `Veja fotos e avaliações do pôr do sol em ${location.name}, ${location.city}.`,
     };
   } catch {
-    return { title: "Local — Sunset" };
+    return { title: "Local — Sunsetsss" };
   }
 }
 

@@ -1,8 +1,8 @@
 @AGENTS.md
 
-# Sunset Web
+# Sunsetsss Web
 
-Aplicação web (Next.js / React) do **Sunset** — plataforma onde usuários
+Aplicação web (Next.js / React) do **Sunsetsss** — plataforma onde usuários
 pesquisam locais com as mais bonitas visões de pôr do sol, postam fotos
 marcando o local, curtem, comentam e avaliam os locais para gerar rankings.
 Este projeto é o front-end que consome a API .NET (`Sunset.API`).
@@ -19,13 +19,13 @@ Este projeto é o front-end que consome a API .NET (`Sunset.API`).
 - **Tipografia**: `Fraunces` (serifada, títulos/display), `Karla` (sans, corpo), `JetBrains Mono` (coordenadas, contadores, dados).
 - **Elementos de marca**: disco do sol com glow, linha do horizonte, cards de foto com overlay gradiente escuro na base para legibilidade do texto.
 - Referência visual em `prototype/sunset-prototype-dark.html` e `prototype/sunset-prototype-light.html` (mockups estáticos aprovados — abrir direto no navegador).
-- **Logos oficiais**: `public/images/logo-horizontal.svg` (ícone + wordmark lado a lado, usado na Navbar), `public/images/logo-vertical.svg` (ícone + wordmark empilhados, usado em telas estreitas como login/register), `app/icon.svg` (ícone isolado, favicon via convenção de arquivo do Next.js). O wordmark das duas primeiras foi recolorido de preto para `--cream` (`#fff6ec`) para ficar legível sobre o fundo escuro padrão do site; o ícone do sol permanece `#f86f02` fixo nas três. Cada uma tem uma variante `-light.svg` (wordmark em `--ink`) para o tema light — ver toggle abaixo.
+- **Logos oficiais** (PNG, originais em `novo_logo/`): `public/images/logo-horizontal.png` (ícone + wordmark lado a lado, usado na Navbar), `public/images/logo-vertical.png` (ícone + wordmark empilhados, usado em telas estreitas como login/register), `app/icon.png` (ícone isolado, favicon via convenção de arquivo do Next.js). Cada logo é um único arquivo, sem variante por tema: o wordmark laranja/dourado "Sunsetsss" é usado igual no dark e no light.
 - **Toggle dark/light**: implementado. `lib/hooks/useTheme.ts` lê/grava `data-theme` em `<html>` + `localStorage("sunset-theme")`; `components/ui/ThemeToggle.tsx` (no Navbar) alterna. Um script inline no `<head>` de `app/layout.tsx` aplica o tema salvo (ou `prefers-color-scheme`) antes da hidratação, evitando flash. Estilização via variant custom `light:` (definido em `app/globals.css` com `@custom-variant`, seletor `[data-theme="light"]`) aplicado por cima das classes dark (padrão) em cada componente — não há troca de significado dos tokens `dusk-*`/`cream`, só overrides pontuais.
 
 ## Estrutura de pastas
 
 ```
-sunset-web/
+sunsetsss-web/
 ├── app/
 │   ├── layout.tsx
 │   ├── page.tsx                 # home (hero + ranking + galeria)

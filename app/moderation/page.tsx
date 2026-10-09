@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ModerationDashboard from "@/components/moderation/ModerationDashboard";
 
-export const metadata: Metadata = { title: "Moderação — Sunset" };
+export const metadata: Metadata = { title: "Moderação — Sunsetsss" };
 
 export default function ModerationPage() {
   return (

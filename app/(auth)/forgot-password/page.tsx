@@ -37,16 +37,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="mx-auto max-w-sm px-[5vw] py-32">
-      {/* SVGs locais - unoptimized evita a exigência de dangerouslyAllowSVG no config só pra um logo vetorial que já é pequeno. */}
-      <Image src="/images/logo-vertical.svg" alt="Sunset" width={160} height={160} unoptimized className="mx-auto mb-10 h-24 w-auto light:hidden" />
-      <Image
-        src="/images/logo-vertical-light.svg"
-        alt="Sunset"
-        width={160}
-        height={160}
-        unoptimized
-        className="mx-auto mb-10 hidden h-24 w-auto light:block"
-      />
+      <Image src="/images/logo-vertical.png" alt="Sunsetsss" width={160} height={160} className="mx-auto mb-10 h-24 w-auto" />
       <h1 className="mb-8 text-center font-display text-2xl font-semibold">Esqueci minha senha</h1>
       {sent ? (
         <p className="text-center text-sm text-cream-dim light:text-ink-dim">

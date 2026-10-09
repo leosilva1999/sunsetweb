@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getPrivacyPolicy } from "@/lib/api/legalDocuments";
 import { formatDate } from "@/lib/utils/formatDate";
 
-export const metadata: Metadata = { title: "Política de Privacidade — Sunset" };
+export const metadata: Metadata = { title: "Política de Privacidade — Sunsetsss" };
 
 // Sem searchParams/cookies, a página seria pré-renderizada estática no build e
 // congelaria a política vigente naquele momento — revalida periodicamente em vez

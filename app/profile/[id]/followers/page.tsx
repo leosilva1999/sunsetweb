@@ -8,9 +8,9 @@ export async function generateMetadata({ params }: PageProps<"/profile/[id]/foll
   const { id } = await params;
   try {
     const user = await getUser(id);
-    return { title: `Seguidores de ${user.name} — Sunset` };
+    return { title: `Seguidores de ${user.name} — Sunsetsss` };
   } catch {
-    return { title: "Seguidores — Sunset" };
+    return { title: "Seguidores — Sunsetsss" };
   }
 }
 
