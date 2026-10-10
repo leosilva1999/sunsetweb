@@ -1,4 +1,5 @@
 import SearchBar from "@/components/location/SearchBar";
+import NearbyButton from "@/components/location/NearbyButton";
 import RankingList from "@/components/location/RankingList";
 import GalleryTabs from "@/components/photo/GalleryTabs";
 import UploadCtaButton from "@/components/photo/UploadCtaButton";
@@ -43,6 +44,9 @@ export default async function HomePage() {
             compartilhe as suas.
           </p>
           <SearchBar />
+          <div className="mt-4">
+            <NearbyButton />
+          </div>
         </div>
       </header>
 

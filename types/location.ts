@@ -5,6 +5,8 @@ export interface Location {
   longitude: number;
   city: string;
   avgRating: number;
+  // Só preenchido na busca "perto de mim" (lat/lng enviados); null no resto.
+  distanceKm: number | null;
   createdAt: string;
 }
 
