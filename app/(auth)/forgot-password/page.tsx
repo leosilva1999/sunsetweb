@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="mx-auto max-w-sm px-[5vw] py-32">
-      <Image src="/images/logo-vertical.png" alt="Sunsetsss" width={160} height={160} className="mx-auto mb-10 h-24 w-auto" />
+      <Image src="/images/logo-vertical.png" alt="Sunsetsss" width={512} height={512} priority className="mx-auto mb-10 h-24 w-auto" />
       <h1 className="mb-8 text-center font-display text-2xl font-semibold">Esqueci minha senha</h1>
       {sent ? (
         <p className="text-center text-sm text-cream-dim light:text-ink-dim">

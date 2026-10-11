@@ -16,7 +16,7 @@ export default function Navbar() {
       <MobileMenu />
 
       <Link href="/" className="flex items-center justify-self-center md:justify-self-auto">
-        <Image src="/images/logo-horizontal.png" alt="Sunsetsss" width={400} height={100} priority className="h-8 w-auto" />
+        <Image src="/images/logo-horizontal.png" alt="Sunsetsss" width={512} height={128} priority className="h-8 w-auto" />
       </Link>
 
       <div className="hidden gap-8 text-sm font-medium md:flex">
