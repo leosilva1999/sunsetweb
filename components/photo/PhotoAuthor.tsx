@@ -32,9 +32,8 @@ export default function PhotoAuthor({ userId, userName, userAvatarUrl }: PhotoAu
         <span className="font-medium">{userName}</span>
       </Link>
       {!isOwnPhoto && (
-        // isFollowedByCurrentUser real só é resolvido com o token (client-side) - o fetch
-        // inicial da página é server-side e sempre anônimo, mesmo limite já aceito em
-        // likedByCurrentUser (LikeButton) e no ProfileHeader.
+        // O fetch inicial da página é server-side e anônimo: o estado real de
+        // "seguindo" é resolvido no client pelo useFollowUser, com o token.
         <FollowButton userId={userId} initialFollowing={false} />
       )}
     </div>

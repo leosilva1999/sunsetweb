@@ -59,8 +59,10 @@ export function logout(refreshToken: string) {
   });
 }
 
-export function getUser(id: string) {
-  return apiFetch<PublicUser>(`/users/${id}`);
+// token é opcional: sem ele a API trata o chamador como anônimo e devolve
+// isFollowedByCurrentUser sempre false.
+export function getUser(id: string, token?: string | null) {
+  return apiFetch<PublicUser>(`/users/${id}`, { token });
 }
 
 export function followUser(id: string, token: string) {
