@@ -3,6 +3,7 @@ import { Fraunces, Karla, JetBrains_Mono } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AppProviders from "@/components/layout/AppProviders";
+import { SITE_URL } from "@/lib/utils/siteUrl";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -25,9 +26,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Sunsetsss — Encontre o melhor pôr do sol",
   description:
     "Pesquise locais com as mais bonitas visões de pôr do sol, poste fotos, curta, comente e avalie os locais.",
+  openGraph: {
+    type: "website",
+    siteName: "Sunsetsss",
+    locale: "pt_BR",
+    // Resolvido contra o metadataBase acima.
+    images: ["/images/logo-vertical.png"],
+  },
 };
 
 const THEME_INIT_SCRIPT = `
