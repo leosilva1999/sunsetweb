@@ -71,17 +71,26 @@ Rotas em `app/` refletem 1:1 os recursos da API. Toda chamada HTTP passa por `li
 
 ### Pré-requisitos
 
-- Node.js 20+
+- Node.js 20.9+ (exigência do Next 16)
 - A [Sunset.API](../../dotnet/sunsetapi) rodando localmente (veja o README daquele repositório) — o front-end depende dela para qualquer dado real.
 
 ### Configuração
 
-Crie um `.env.local` na raiz com:
+Copie o `.env.example` para `.env.local` na raiz e preencha:
 
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:5256/api/v1
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=<sua-chave-da-google-maps-embed-api>
+cp .env.example .env.local
 ```
+
+| Variável | Obrigatória | Para quê |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Sim | URL base da Sunset.API, terminando em `/api/v1` (dev: `http://localhost:5256/api/v1`) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Para mapas | Mapa do local e seletor de posição no upload |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Para login com Google | ID de cliente OAuth |
+| `NEXT_PUBLIC_ADSENSE_CLIENT_ID`, `NEXT_PUBLIC_ADSENSE_IN_FEED_SLOT_ID`, `NEXT_PUBLIC_ADSENSE_IN_FEED_LAYOUT_KEY` | Não | Anúncios (vazio = sem anúncios) |
+| `NEXT_PUBLIC_LOG_LEVEL` | Não | `debug`/`info`/`warn`/`error` (padrão: `debug` em dev, `warn` em produção) |
+
+As variáveis `NEXT_PUBLIC_*` são embutidas no código durante o build — mudar uma delas exige um novo build.
 
 ### Comandos
 
@@ -92,6 +101,24 @@ npm run build   # build de produção
 npm run start   # serve o build de produção
 npm run lint    # ESLint
 ```
+
+## Deploy (Hostinger — hospedagem de apps web, a partir do GitHub)
+
+Produção: **https://sunsetsss.com**, branch `main`.
+
+1. No painel da Hostinger, importe este repositório do GitHub e escolha a branch `main`. Framework: Next.js.
+2. **Node.js 20.9 ou superior** (recomendado 22).
+3. Comandos: instalar `npm install`, build `npm run build`, iniciar `npm run start`.
+4. Cadastre as variáveis de ambiente do `.env.example` no painel — `.env*` não vai pro Git, então nada é herdado do repositório. `NEXT_PUBLIC_API_URL` é obrigatória e deve ser **HTTPS**.
+5. Aponte o domínio `sunsetsss.com` para o app e ative o SSL.
+
+Do lado da **Sunset.API** (configuração de produção, fora deste repositório):
+
+- `Cors:AllowedOrigins` deve listar `https://sunsetsss.com` (e `https://www.sunsetsss.com`, se usado) — vazio, o navegador bloqueia toda chamada.
+- `Frontend:BaseUrl` deve ser `https://sunsetsss.com` (links dos e-mails, como a recuperação de senha).
+- A API e o storage das fotos (`Storage:PublicBaseUrl`) precisam estar públicos e em HTTPS.
+
+Do lado do **Google**: restrinja a chave do Maps por referenciador a `https://sunsetsss.com/*` e cadastre o domínio em "Origens JavaScript autorizadas" do cliente OAuth.
 
 ## Decisões de design
 
