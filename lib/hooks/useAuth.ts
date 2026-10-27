@@ -137,6 +137,19 @@ export function useAuth() {
     [getAccessToken],
   );
 
+  // Manda o refresh token atual pra a API manter ESTE aparelho logado e derrubar os outros.
+  // Lê o token depois do getAccessToken(), que pode ter rotacionado o refresh token.
+  const changePassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      const token = await getAccessToken();
+      const current = readAuth();
+      if (!token || !current) throw new Error("not authenticated");
+
+      await authApi.changePassword({ currentPassword, newPassword, refreshToken: current.refreshToken }, token);
+    },
+    [getAccessToken],
+  );
+
   const deleteAccount = useCallback(async () => {
     const token = await getAccessToken();
     if (!token) throw new Error("not authenticated");
@@ -155,6 +168,7 @@ export function useAuth() {
     logout,
     getAccessToken,
     updateProfile,
+    changePassword,
     deleteAccount,
   };
 }

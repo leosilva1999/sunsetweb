@@ -102,6 +102,17 @@ export function updateMe(
   });
 }
 
+export function changePassword(
+  data: { currentPassword: string; newPassword: string; refreshToken?: string },
+  token: string,
+) {
+  return apiFetch<void>("/users/me/password", {
+    method: "PUT",
+    body: JSON.stringify(data),
+    token,
+  });
+}
+
 export function deleteMe(token: string) {
   return apiFetch<void>("/users/me", { method: "DELETE", token });
 }

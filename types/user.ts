@@ -21,6 +21,9 @@ export type UserRole = "User" | "Moderator" | "Admin";
 export interface User extends PublicUser {
   email: string;
   role: UserRole;
+  // false em contas criadas via Google (sem senha própria). Sessões salvas antes desse campo
+  // existir chegam como undefined - trate só `=== false` como "sem senha".
+  hasPassword?: boolean;
 }
 
 export interface AvatarUploadUrl {

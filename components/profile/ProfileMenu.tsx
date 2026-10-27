@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import KebabMenu from "@/components/ui/KebabMenu";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import ChangePasswordModal from "@/components/profile/ChangePasswordModal";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { getUserPhotos } from "@/lib/api/auth";
 import type { PublicUser } from "@/types/user";
@@ -17,12 +18,23 @@ const menuItemClass =
   "block w-full px-4 py-2.5 text-left text-sm font-medium opacity-85 hover:opacity-100 hover:bg-white/5 disabled:opacity-40 light:hover:bg-black/5";
 
 export default function ProfileMenu({ user }: ProfileMenuProps) {
-  const { deleteAccount } = useAuth();
+  const { user: authUser, deleteAccount } = useAuth();
   const router = useRouter();
+  const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+  const [passwordChanged, setPasswordChanged] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Contas do Google não têm senha (hasPassword === false) - não há o que alterar.
+  const canChangePassword = authUser?.hasPassword !== false;
+
+  useEffect(() => {
+    if (!passwordChanged) return;
+    const timer = setTimeout(() => setPasswordChanged(false), 4000);
+    return () => clearTimeout(timer);
+  }, [passwordChanged]);
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -73,12 +85,31 @@ export default function ProfileMenu({ user }: ProfileMenuProps) {
         <button type="button" onClick={handleExport} disabled={isExporting} className={menuItemClass}>
           {isExporting ? "Gerando arquivo..." : "Baixar meus dados"}
         </button>
+        {canChangePassword && (
+          <button type="button" onClick={() => setIsPasswordOpen(true)} className={menuItemClass}>
+            Alterar senha
+          </button>
+        )}
         <button type="button" onClick={() => setIsDeleteOpen(true)} className={`${menuItemClass} text-sun-deep`}>
           Excluir minha conta
         </button>
       </KebabMenu>
 
       {error && <p className="absolute top-full right-0 mt-2 w-48 text-right text-xs text-sun-deep">{error}</p>}
+      {passwordChanged && (
+        <p role="status" className="absolute top-full right-0 mt-2 w-48 text-right text-xs text-sun-mid light:text-sun-deep">
+          Senha alterada
+        </p>
+      )}
+
+      <ChangePasswordModal
+        open={isPasswordOpen}
+        onChanged={() => {
+          setIsPasswordOpen(false);
+          setPasswordChanged(true);
+        }}
+        onCancel={() => setIsPasswordOpen(false)}
+      />
 
       <ConfirmDialog
         open={isDeleteOpen}
