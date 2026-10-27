@@ -43,9 +43,8 @@ const THEME_INIT_SCRIPT = `
 (function () {
   try {
     var stored = localStorage.getItem("sunset-theme");
-    var theme = stored === "light" || stored === "dark"
-      ? stored
-      : (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    // Sem escolha salva, o padrão é light (não segue o tema do sistema).
+    var theme = stored === "dark" ? "dark" : "light";
     document.documentElement.dataset.theme = theme;
   } catch (e) {}
 })();

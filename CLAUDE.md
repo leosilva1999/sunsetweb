@@ -15,12 +15,12 @@ Este projeto é o front-end que consome a API .NET (`Sunset.API`).
 
 ## Identidade visual (do protótipo já aprovado)
 
-- **Cores**: gradiente de pôr do sol — roxo/anil de crepúsculo (`#1e1038`, `#2d1b4e`) até laranja/dourado (`#ff8c5a`, `#ffcf6b`), com rosa de entardecer (`#e85d8a`) como acento. Existe uma versão dark (fundo escuro, padrão) e uma light (fundo em tons de papel/creme, `#fff9f2`).
+- **Cores**: gradiente de pôr do sol — roxo/anil de crepúsculo (`#1e1038`, `#2d1b4e`) até laranja/dourado (`#ff8c5a`, `#ffcf6b`), com rosa de entardecer (`#e85d8a`) como acento. Existe uma versão dark (fundo escuro) e uma light (fundo em tons de papel/creme, `#fff9f2`, padrão na primeira visita).
 - **Tipografia**: `Fraunces` (serifada, títulos/display), `Karla` (sans, corpo), `JetBrains Mono` (coordenadas, contadores, dados).
 - **Elementos de marca**: disco do sol com glow, linha do horizonte, cards de foto com overlay gradiente escuro na base para legibilidade do texto.
 - Referência visual em `prototype/sunset-prototype-dark.html` e `prototype/sunset-prototype-light.html` (mockups estáticos aprovados — abrir direto no navegador).
 - **Logos oficiais** (PNG, originais em `novo_logo/`): `public/images/logo-horizontal.png` (ícone + wordmark lado a lado, usado na Navbar), `public/images/logo-vertical.png` (ícone + wordmark empilhados, usado em telas estreitas como login/register), `app/icon.png` (ícone isolado, favicon via convenção de arquivo do Next.js). Cada logo é um único arquivo, sem variante por tema: o wordmark laranja/dourado "Sunsetsss" é usado igual no dark e no light.
-- **Toggle dark/light**: implementado. `lib/hooks/useTheme.ts` lê/grava `data-theme` em `<html>` + `localStorage("sunset-theme")`; `components/ui/ThemeToggle.tsx` (no Navbar) alterna. Um script inline no `<head>` de `app/layout.tsx` aplica o tema salvo (ou `prefers-color-scheme`) antes da hidratação, evitando flash. Estilização via variant custom `light:` (definido em `app/globals.css` com `@custom-variant`, seletor `[data-theme="light"]`) aplicado por cima das classes dark (padrão) em cada componente — não há troca de significado dos tokens `dusk-*`/`cream`, só overrides pontuais.
+- **Toggle dark/light**: implementado. `lib/hooks/useTheme.ts` lê/grava `data-theme` em `<html>` + `localStorage("sunset-theme")`; `components/ui/ThemeToggle.tsx` (no Navbar) alterna. Um script inline no `<head>` de `app/layout.tsx` aplica o tema salvo antes da hidratação, evitando flash; sem escolha salva o padrão é **light** (o tema do sistema, `prefers-color-scheme`, é ignorado). Estilização via variant custom `light:` (definido em `app/globals.css` com `@custom-variant`, seletor `[data-theme="light"]`) aplicado por cima das classes dark (padrão) em cada componente — não há troca de significado dos tokens `dusk-*`/`cream`, só overrides pontuais.
 
 ## Estrutura de pastas
 

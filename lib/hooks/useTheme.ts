@@ -8,7 +8,7 @@ const STORAGE_KEY = "sunset-theme";
 const listeners = new Set<() => void>();
 
 function readTheme(): Theme {
-  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
 function writeTheme(theme: Theme) {
@@ -23,7 +23,7 @@ function subscribe(callback: () => void) {
 }
 
 function getServerSnapshot(): Theme {
-  return "dark";
+  return "light";
 }
 
 export function useTheme() {
