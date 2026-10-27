@@ -9,6 +9,8 @@ import { formatDate } from "@/lib/utils/formatDate";
 import EditProfileModal from "@/components/profile/EditProfileModal";
 import ProfileMenu from "@/components/profile/ProfileMenu";
 import FollowButton from "@/components/profile/FollowButton";
+import ShareButton from "@/components/ui/ShareButton";
+import { SITE_URL } from "@/lib/utils/siteUrl";
 import type { PublicUser } from "@/types/user";
 
 interface ProfileHeaderProps {
@@ -22,6 +24,14 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
 
   const isOwnProfile = authUser?.id === user.id;
   const displayedUser = isOwnProfile && authUser ? authUser : user;
+
+  const shareButton = (
+    <ShareButton
+      url={`${SITE_URL}/profile/${user.id}`}
+      title={`${displayedUser.name} no Sunsetsss`}
+      text={`Veja os pores do sol de ${displayedUser.name} no Sunsetsss`}
+    />
+  );
 
   return (
     <div className="mb-14 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
@@ -77,6 +87,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
           >
             Editar perfil
           </button>
+          {shareButton}
           <ProfileMenu user={displayedUser} />
         </div>
       )}
@@ -84,6 +95,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
       {!isOwnProfile && (
         <div className="flex items-center gap-3">
           <FollowButton userId={user.id} initialFollowing={user.isFollowedByCurrentUser} />
+          {shareButton}
         </div>
       )}
 

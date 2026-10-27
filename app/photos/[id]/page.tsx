@@ -7,12 +7,20 @@ import LikeButton from "@/components/photo/LikeButton";
 import PhotoActions from "@/components/photo/PhotoActions";
 import PhotoAuthor from "@/components/photo/PhotoAuthor";
 import Comments from "@/components/photo/Comments";
+import ShareButton from "@/components/ui/ShareButton";
+import { SITE_URL } from "@/lib/utils/siteUrl";
+import { buildPageMetadata } from "@/lib/utils/shareMetadata";
 
 export async function generateMetadata({ params }: PageProps<"/photos/[id]">): Promise<Metadata> {
   const { id } = await params;
   try {
     const photo = await getPhoto(id);
-    return { title: photo.caption ? `${photo.caption} — Sunsetsss` : "Foto — Sunsetsss" };
+    return buildPageMetadata({
+      title: photo.caption ? `${photo.caption} — Sunsetsss` : `Foto em ${photo.locationName} — Sunsetsss`,
+      description: `Pôr do sol em ${photo.locationName}, ${photo.city}, por ${photo.userName}.`,
+      path: `/photos/${id}`,
+      image: photo.imageUrl,
+    });
   } catch {
     return { title: "Foto — Sunsetsss" };
   }
@@ -52,6 +60,14 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
             </>
           )}
           {photo.caption && <p className="mb-4 text-cream-dim light:text-ink-dim">{photo.caption}</p>}
+
+          <div className="mb-4">
+            <ShareButton
+              url={`${SITE_URL}/photos/${photo.id}`}
+              title={photo.caption ?? `Foto em ${photo.locationName}`}
+              text={`Pôr do sol em ${photo.locationName}, ${photo.city} — por ${photo.userName} no Sunsetsss`}
+            />
+          </div>
 
           <PhotoActions photo={photo} />
 
