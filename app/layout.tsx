@@ -1,28 +1,42 @@
 import type { Metadata } from "next";
-import { Fraunces, Karla, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AppProviders from "@/components/layout/AppProviders";
 import { SITE_URL } from "@/lib/utils/siteUrl";
 import "./globals.css";
 
-const fraunces = Fraunces({
+// As três famílias são locais (app/fonts) em vez de next/font/google: evita depender do
+// download das fontes do Google durante o build/deploy. Só os arquivos usados ficam no repo.
+
+// Fraunces 72pt (tamanho óptico de título). Não há arquivo Medium: o Regular cobre 400–500.
+const fraunces = localFont({
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["300", "500", "600"],
-  style: ["normal", "italic"],
+  src: [
+    { path: "./fonts/Fraunces_72pt-Regular.ttf", weight: "400 500", style: "normal" },
+    { path: "./fonts/Fraunces_72pt-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/Fraunces_72pt-Italic.ttf", weight: "400 500", style: "italic" },
+  ],
+  display: "swap",
 });
 
-const karla = Karla({
+const karla = localFont({
   variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  src: [
+    { path: "./fonts/Karla-Regular.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/Karla-Medium.ttf", weight: "500", style: "normal" },
+    { path: "./fonts/Karla-Bold.ttf", weight: "700", style: "normal" },
+  ],
+  display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const jetbrainsMono = localFont({
   variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
+  src: [
+    { path: "./fonts/JetBrainsMono-Regular.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/JetBrainsMono-Medium.ttf", weight: "500", style: "normal" },
+  ],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
