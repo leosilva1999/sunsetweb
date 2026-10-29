@@ -5,8 +5,9 @@ import Link from "next/link";
 import Tabs from "@/components/ui/Tabs";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import BanUserDialog from "@/components/moderation/BanUserDialog";
+import AnonymizeUserDialog from "@/components/moderation/AnonymizeUserDialog";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { getReports, resolveReport } from "@/lib/api/moderation";
+import { getReports, resolveReport, deleteLocation } from "@/lib/api/moderation";
 import { getPhoto, getComment, deletePhoto, deleteComment } from "@/lib/api/photos";
 import { getLocation } from "@/lib/api/locations";
 import { getUser } from "@/lib/api/auth";
@@ -41,7 +42,7 @@ const TARGET_LABELS: Record<ReportTargetType, string> = {
 };
 
 export default function ReportsQueue() {
-  const { getAccessToken } = useAuth();
+  const { user: currentUser, getAccessToken } = useAuth();
   const [status, setStatus] = useState<ReportStatus>("Pending");
   const [reports, setReports] = useState<Report[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -52,6 +53,7 @@ export default function ReportsQueue() {
   const [pendingAction, setPendingAction] = useState<{ report: Report; kind: "resolve" | "dismiss" | "delete" } | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [banReport, setBanReport] = useState<Report | null>(null);
+  const [anonymizeReport, setAnonymizeReport] = useState<Report | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,14 +104,15 @@ export default function ReportsQueue() {
   // O ban em si já foi feito pelo BanUserDialog; aqui só fecha a denúncia (resolver a
   // denúncia não age sobre o alvo, então o ban precisa vir antes).
   const handleBanned = async () => {
-    if (!banReport) return;
-    const report = banReport;
+    const report = banReport ?? anonymizeReport;
+    if (!report) return;
     setBanReport(null);
+    setAnonymizeReport(null);
     try {
       const token = await getAccessToken();
       if (token) await resolveReport(report.id, "Resolved", token);
     } catch {
-      setError("O usuário foi banido, mas não foi possível marcar a denúncia como resolvida.");
+      setError("A ação foi feita, mas não foi possível marcar a denúncia como resolvida.");
       return;
     }
     removeFromList(report.id);
@@ -126,6 +129,8 @@ export default function ReportsQueue() {
       if (kind === "delete") {
         if (report.targetType === "Photo") {
           await deletePhoto(report.targetId, token);
+        } else if (report.targetType === "Location") {
+          await deleteLocation(report.targetId, token);
         } else {
           await deleteComment(report.targetId, token);
         }
@@ -142,14 +147,22 @@ export default function ReportsQueue() {
     }
   };
 
+  const isLocationDelete = pendingAction?.kind === "delete" && pendingAction.report.targetType === "Location";
   const dialogCopy = {
     resolve: { title: "Marcar como resolvida?", description: "A denúncia sai da fila de pendentes.", confirmLabel: "Resolver" },
     dismiss: { title: "Descartar denúncia?", description: "A denúncia sai da fila de pendentes sem nenhuma ação sobre o conteúdo.", confirmLabel: "Descartar" },
-    delete: {
-      title: "Excluir o conteúdo denunciado?",
-      description: "Essa ação não pode ser desfeita. A denúncia também será marcada como resolvida.",
-      confirmLabel: "Excluir conteúdo",
-    },
+    delete: isLocationDelete
+      ? {
+          title: "Excluir o local denunciado?",
+          description:
+            "O local e todas as fotos dele somem do site. Dá para restaurar na aba “Locais excluídos”. A denúncia também será marcada como resolvida.",
+          confirmLabel: "Excluir local",
+        }
+      : {
+          title: "Excluir o conteúdo denunciado?",
+          description: "Essa ação não pode ser desfeita. A denúncia também será marcada como resolvida.",
+          confirmLabel: "Excluir conteúdo",
+        },
   } as const;
 
   return (
@@ -202,12 +215,12 @@ export default function ReportsQueue() {
                   >
                     Descartar
                   </button>
-                  {(report.targetType === "Photo" || report.targetType === "Comment") && (
+                  {report.targetType !== "User" && (
                     <button
                       onClick={() => setPendingAction({ report, kind: "delete" })}
                       className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
                     >
-                      Excluir conteúdo
+                      {report.targetType === "Location" ? "Excluir local" : "Excluir conteúdo"}
                     </button>
                   )}
                   {report.targetType === "User" && (
@@ -216,6 +229,14 @@ export default function ReportsQueue() {
                       className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
                     >
                       Banir usuário
+                    </button>
+                  )}
+                  {report.targetType === "User" && currentUser?.role === "Admin" && (
+                    <button
+                      onClick={() => setAnonymizeReport(report)}
+                      className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
+                    >
+                      Remover conta
                     </button>
                   )}
                 </div>
@@ -251,6 +272,13 @@ export default function ReportsQueue() {
         userName="este usuário"
         onBanned={handleBanned}
         onCancel={() => setBanReport(null)}
+      />
+      <AnonymizeUserDialog
+        open={anonymizeReport !== null}
+        userId={anonymizeReport?.targetId ?? ""}
+        userName="este usuário"
+        onDone={handleBanned}
+        onCancel={() => setAnonymizeReport(null)}
       />
     </div>
   );

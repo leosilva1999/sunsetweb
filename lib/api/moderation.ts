@@ -1,6 +1,7 @@
 import { apiFetch } from "@/lib/api/client";
 import type { Report, ReportTargetType, ReportReason, ReportStatus, ModerationAction } from "@/types/report";
 import type { User, UserRole } from "@/types/user";
+import type { Location, DeletedLocation } from "@/types/location";
 import type { CursorPage } from "@/types/pagination";
 
 export function createReport(
@@ -64,6 +65,47 @@ export function banUser(userId: string, reason: string, until: string | null, to
 
 export function unbanUser(userId: string, token: string) {
   return apiFetch<void>(`/moderation/users/${userId}/ban`, { method: "DELETE", token });
+}
+
+// Irreversível. Só Admin. hideContent também esconde fotos e comentários do usuário.
+export function anonymizeUser(userId: string, reason: string, hideContent: boolean, token: string) {
+  return apiFetch<void>(`/moderation/users/${userId}/anonymize`, {
+    method: "POST",
+    body: JSON.stringify({ reason, hideContent }),
+    token,
+  });
+}
+
+export function updateLocationCoordinates(locationId: string, latitude: number, longitude: number, token: string) {
+  return apiFetch<Location>(`/moderation/locations/${locationId}/coordinates`, {
+    method: "PATCH",
+    body: JSON.stringify({ latitude, longitude }),
+    token,
+  });
+}
+
+// Exclusão lógica: esconde o local E as fotos dele. Reversível com restoreLocation.
+export function deleteLocation(locationId: string, token: string) {
+  return apiFetch<void>(`/moderation/locations/${locationId}`, { method: "DELETE", token });
+}
+
+export function restoreLocation(locationId: string, token: string) {
+  return apiFetch<void>(`/moderation/locations/${locationId}/restore`, { method: "POST", token });
+}
+
+// Lista simples (não é paginada por cursor), mais recentes primeiro.
+export function getDeletedLocations(token: string, limit?: number) {
+  const suffix = limit ? `?limit=${limit}` : "";
+  return apiFetch<DeletedLocation[]>(`/moderation/locations/deleted${suffix}`, { token });
+}
+
+// O local da URL é o duplicado (some); targetId é o que continua. NÃO dá pra desfazer.
+export function mergeLocation(duplicateId: string, targetId: string, token: string) {
+  return apiFetch<Location>(`/moderation/locations/${duplicateId}/merge`, {
+    method: "POST",
+    body: JSON.stringify({ targetId }),
+    token,
+  });
 }
 
 export function getModerationActions(token: string, cursor?: string, limit?: number) {

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Button from "@/components/ui/Button";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import BanUserDialog from "@/components/moderation/BanUserDialog";
+import AnonymizeUserDialog from "@/components/moderation/AnonymizeUserDialog";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { searchUsers, changeUserRole, unbanUser } from "@/lib/api/moderation";
 import { formatDate } from "@/lib/utils/formatDate";
@@ -24,6 +25,7 @@ export default function UserRoleManager() {
   const [banTarget, setBanTarget] = useState<User | null>(null);
   const [unbanTarget, setUnbanTarget] = useState<User | null>(null);
   const [isUnbanning, setIsUnbanning] = useState(false);
+  const [anonymizeTarget, setAnonymizeTarget] = useState<User | null>(null);
 
   const loadUsers = async () => {
     setIsSearching(true);
@@ -173,6 +175,14 @@ export default function UserRoleManager() {
                     {u.isBanned ? "Remover banimento" : "Banir"}
                   </button>
                 )}
+                {!isSelf && u.role !== "Admin" && (
+                  <button
+                    onClick={() => setAnonymizeTarget(u)}
+                    className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
+                  >
+                    Remover conta
+                  </button>
+                )}
               </li>
             );
           })}
@@ -185,6 +195,16 @@ export default function UserRoleManager() {
         userName={banTarget?.name ?? ""}
         onBanned={handleBanned}
         onCancel={() => setBanTarget(null)}
+      />
+      <AnonymizeUserDialog
+        open={anonymizeTarget !== null}
+        userId={anonymizeTarget?.id ?? ""}
+        userName={anonymizeTarget?.name ?? ""}
+        onDone={() => {
+          setAnonymizeTarget(null);
+          return loadUsers();
+        }}
+        onCancel={() => setAnonymizeTarget(null)}
       />
       <ConfirmDialog
         open={unbanTarget !== null}

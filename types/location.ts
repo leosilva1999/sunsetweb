@@ -19,3 +19,14 @@ export interface SunsetTime {
   solarNoon: string;
   dayLengthSeconds: number;
 }
+
+// Item de GET /moderation/locations/deleted (lista de locais excluídos, pra restaurar).
+export interface DeletedLocation {
+  id: string;
+  name: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  deletedAt: string;
+  deletedByUserId: string | null;
+}
