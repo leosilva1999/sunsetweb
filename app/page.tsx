@@ -5,6 +5,12 @@ import GalleryTabs from "@/components/photo/GalleryTabs";
 import UploadCtaButton from "@/components/photo/UploadCtaButton";
 import { getLocationRanking } from "@/lib/api/locations";
 import { getPhotos, getPhotoCount } from "@/lib/api/photos";
+import JsonLd from "@/components/seo/JsonLd";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/utils/structuredData";
+import type { Metadata } from "next";
+
+// Só o canonical: título, descrição e prévia vêm do layout (a home usa o title.default).
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 // Sem searchParams/cookies, a home seria pré-renderizada estática no build e
 // congelaria o ranking/fotos recentes daquele momento — revalida periodicamente
@@ -20,6 +26,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={[websiteJsonLd(), organizationJsonLd()]} />
       <header className="relative flex h-screen min-h-[640px] flex-col justify-end overflow-hidden bg-[linear-gradient(180deg,var(--dusk-950)_0%,var(--dusk-900)_22%,var(--dusk-700)_42%,var(--sun-deep)_60%,var(--sun-mid)_72%,var(--sun-core)_82%,#fff2d6_100%)] light:bg-[linear-gradient(180deg,#fef1de_0%,#ffe0bd_22%,#ffb98a_42%,var(--sun-deep)_62%,var(--sun-mid)_76%,var(--sun-core)_88%,#fff2d6_100%)]">
         <div className="absolute inset-x-0 top-0 h-[45%] bg-[radial-gradient(1.5px_1.5px_at_15%_20%,#fff,transparent),radial-gradient(1.5px_1.5px_at_35%_10%,#fff,transparent),radial-gradient(1px_1px_at_55%_25%,#fff,transparent),radial-gradient(1.5px_1.5px_at_75%_15%,#fff,transparent),radial-gradient(1px_1px_at_88%_30%,#fff,transparent)] opacity-60 light:opacity-0" />
         <div className="absolute bottom-[14%] left-1/2 h-[230px] w-[230px] -translate-x-1/2 animate-pulse rounded-full bg-[radial-gradient(circle_at_40%_35%,#fff6d8,var(--sun-core)_45%,var(--sun-mid)_80%)] shadow-[0_0_90px_20px_rgba(255,140,90,0.55)]" />

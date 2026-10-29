@@ -2,7 +2,16 @@ import { Suspense } from "react";
 import RankingList from "@/components/location/RankingList";
 import RankingPeriodTabs from "@/components/location/RankingPeriodTabs";
 import { getLocationRanking } from "@/lib/api/locations";
+import { buildPageMetadata } from "@/lib/utils/shareMetadata";
+import type { Metadata } from "next";
 import type { Location } from "@/types/location";
+
+// O período (?period=) muda só o conteúdo; o canonical aponta sempre pra /ranking.
+export const metadata: Metadata = buildPageMetadata({
+  title: "Ranking dos melhores locais para ver o pôr do sol",
+  description: "Os locais de pôr do sol mais bem avaliados da semana, do mês e de todos os tempos, segundo quem já foi.",
+  path: "/ranking",
+});
 
 export default async function RankingPage({ searchParams }: PageProps<"/ranking">) {
   const { period: rawPeriod } = await searchParams;

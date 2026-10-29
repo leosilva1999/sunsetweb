@@ -3,14 +3,16 @@ import { notFound } from "next/navigation";
 import { getUser, getUserFollowers } from "@/lib/api/auth";
 import BackButton from "@/components/ui/BackButton";
 import UserList from "@/components/profile/UserList";
+import { NO_INDEX } from "@/lib/utils/shareMetadata";
 
 export async function generateMetadata({ params }: PageProps<"/profile/[id]/followers">): Promise<Metadata> {
   const { id } = await params;
   try {
     const user = await getUser(id);
-    return { title: `Seguidores de ${user.name} — Sunsetsss` };
+    // Lista de pessoas: sem valor próprio pra busca, e o perfil já é a página indexável.
+    return { title: `Seguidores de ${user.name}`, ...NO_INDEX };
   } catch {
-    return { title: "Seguidores — Sunsetsss" };
+    return { title: "Seguidores", ...NO_INDEX };
   }
 }
 

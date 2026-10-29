@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTerms } from "@/lib/api/legalDocuments";
 import { formatDate } from "@/lib/utils/formatDate";
+import { buildPageMetadata } from "@/lib/utils/shareMetadata";
 
-export const metadata: Metadata = { title: "Termos de Uso — Sunsetsss" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Termos de Uso",
+  description: "Os termos de uso do Sunsetsss.",
+  path: "/termos",
+});
 
 // Sem searchParams/cookies, a página seria pré-renderizada estática no build e
 // congelaria os termos vigentes naquele momento — revalida periodicamente em vez

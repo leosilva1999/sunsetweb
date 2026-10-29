@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPhoto, getPhotoComments } from "@/lib/api/photos";
 import { getLocation } from "@/lib/api/locations";
@@ -10,19 +11,21 @@ import Comments from "@/components/photo/Comments";
 import ShareButton from "@/components/ui/ShareButton";
 import { SITE_URL } from "@/lib/utils/siteUrl";
 import { buildPageMetadata } from "@/lib/utils/shareMetadata";
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbJsonLd, photoJsonLd } from "@/lib/utils/structuredData";
 
 export async function generateMetadata({ params }: PageProps<"/photos/[id]">): Promise<Metadata> {
   const { id } = await params;
   try {
     const photo = await getPhoto(id);
     return buildPageMetadata({
-      title: photo.caption ? `${photo.caption} — Sunsetsss` : `Foto em ${photo.locationName} — Sunsetsss`,
+      title: photo.caption ? `${photo.caption} — pôr do sol em ${photo.locationName}` : `Pôr do sol em ${photo.locationName}, ${photo.city}`,
       description: `Pôr do sol em ${photo.locationName}, ${photo.city}, por ${photo.userName}.`,
       path: `/photos/${id}`,
       image: photo.imageUrl,
     });
   } catch {
-    return { title: "Foto — Sunsetsss" };
+    return { title: "Foto" };
   }
 }
 
@@ -41,10 +44,31 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
 
   return (
     <div className="px-[5vw] py-32">
+      <JsonLd
+        data={[
+          photoJsonLd(photo),
+          breadcrumbJsonLd([
+            { name: "Início", path: "/" },
+            { name: photo.locationName, path: `/locations/${photo.locationId}` },
+            { name: "Foto", path: `/photos/${photo.id}` },
+          ]),
+        ]}
+      />
       <BackButton />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.4fr_1fr]">
-        <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-cover bg-center" style={{ backgroundImage: `url(${photo.imageUrl})` }}>
+        <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
+          {/* <img> de verdade (não background-image): é o que o Google Imagens indexa, e o alt
+              descreve a foto. unoptimized: a URL vem do storage da API, fora do remotePatterns. */}
+          <Image
+            src={photo.imageUrl}
+            alt={`Pôr do sol em ${photo.locationName}, ${photo.city}${photo.caption ? ` — ${photo.caption}` : ""}`}
+            fill
+            priority
+            unoptimized
+            sizes="(min-width: 1024px) 58vw, 100vw"
+            className="object-cover"
+          />
           <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
         </div>
 

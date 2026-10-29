@@ -8,17 +8,29 @@ import LocationRatings from "@/components/location/LocationRatings";
 import LocationMap from "@/components/location/LocationMap";
 import LocationReportButton from "@/components/location/LocationReportButton";
 import LocationModerationBar from "@/components/moderation/LocationModerationBar";
+import JsonLd from "@/components/seo/JsonLd";
+import { buildPageMetadata } from "@/lib/utils/shareMetadata";
+import { breadcrumbJsonLd, placeJsonLd } from "@/lib/utils/structuredData";
 
 export async function generateMetadata({ params }: PageProps<"/locations/[id]">): Promise<Metadata> {
   const { id } = await params;
   try {
-    const location = await getLocation(id);
-    return {
-      title: `${location.name} — Sunsetsss`,
-      description: `Veja fotos e avaliações do pôr do sol em ${location.name}, ${location.city}.`,
-    };
+    // Mesma chamada que a página faz (getLocationPhotos(id)), então o Next reaproveita a
+    // resposta em vez de ir à API duas vezes.
+    const [location, photos] = await Promise.all([
+      getLocation(id),
+      getLocationPhotos(id).catch(() => null),
+    ]);
+    const rating = location.avgRating > 0 ? ` Nota média ${location.avgRating.toFixed(1)} de 5.` : "";
+    return buildPageMetadata({
+      title: `Pôr do sol em ${location.name}, ${location.city}`,
+      description: `Veja fotos e avaliações do pôr do sol em ${location.name}, ${location.city}.${rating}`,
+      path: `/locations/${id}`,
+      // Prévia com uma foto do próprio local; sem fotos, cai no logo.
+      image: photos?.items[0]?.imageUrl,
+    });
   } catch {
-    return { title: "Local — Sunsetsss" };
+    return { title: "Local" };
   }
 }
 
@@ -40,6 +52,16 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
 
   return (
     <div className="px-[5vw] py-32">
+      <JsonLd
+        data={[
+          placeJsonLd(location, photos.items.slice(0, 5).map((photo) => photo.imageUrl)),
+          breadcrumbJsonLd([
+            { name: "Início", path: "/" },
+            { name: "Locais", path: "/locations" },
+            { name: location.name, path: `/locations/${id}` },
+          ]),
+        ]}
+      />
       <BackButton />
 
       <span className="mb-2 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">

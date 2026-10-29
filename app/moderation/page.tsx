@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import ModerationDashboard from "@/components/moderation/ModerationDashboard";
+import { NO_INDEX } from "@/lib/utils/shareMetadata";
 
-export const metadata: Metadata = { title: "Moderação — Sunsetsss" };
+export const metadata: Metadata = { title: "Moderação", ...NO_INDEX };
 
 export default function ModerationPage() {
   return (

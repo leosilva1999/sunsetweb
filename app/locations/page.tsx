@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import LocationSearch from "@/components/location/LocationSearch";
 import { searchLocations } from "@/lib/api/locations";
+import { buildPageMetadata } from "@/lib/utils/shareMetadata";
 import type { CursorPage } from "@/types/pagination";
 import type { Location } from "@/types/location";
+
+// Buscas (?q=) e "perto de mim" (?nearby=) mudam só o conteúdo; o canonical é sempre /locations.
+export const metadata: Metadata = buildPageMetadata({
+  title: "Explorar locais de pôr do sol",
+  description: "Pesquise por cidade, praia ou mirante e encontre os melhores locais para ver o pôr do sol, com fotos e avaliações.",
+  path: "/locations",
+});
 
 export default async function LocationsPage({ searchParams }: PageProps<"/locations">) {
   const { q: rawQ, nearby } = await searchParams;

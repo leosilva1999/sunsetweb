@@ -41,7 +41,9 @@ const jetbrainsMono = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Sunsetsss — Encontre o melhor pôr do sol",
+  // `default` vale pra home; as demais páginas passam só o próprio título e o template
+  // acrescenta " — Sunsetsss".
+  title: { default: "Sunsetsss — Encontre o melhor pôr do sol", template: "%s — Sunsetsss" },
   description:
     "Pesquise locais com as mais bonitas visões de pôr do sol, poste fotos, curta, comente e avalie os locais.",
   openGraph: {

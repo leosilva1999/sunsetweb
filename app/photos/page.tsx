@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import PhotoFeed from "@/components/photo/PhotoFeed";
 import { getPhotos } from "@/lib/api/photos";
+import { buildPageMetadata } from "@/lib/utils/shareMetadata";
 
-export const metadata: Metadata = { title: "Fotos — Sunsetsss" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Fotos de pôr do sol da comunidade",
+  description: "As fotos de pôr do sol mais recentes e mais curtidas, postadas por quem já foi aos melhores locais.",
+  path: "/photos",
+});
 
 // Sem searchParams/cookies, essa página seria estática e congelaria as fotos
 // do momento do build — revalida periodicamente em vez de exigir um redeploy.

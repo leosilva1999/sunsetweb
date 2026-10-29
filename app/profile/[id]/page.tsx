@@ -10,13 +10,13 @@ export async function generateMetadata({ params }: PageProps<"/profile/[id]">): 
   try {
     const user = await getUser(id);
     return buildPageMetadata({
-      title: `${user.name} — Sunsetsss`,
+      title: user.name,
       description: user.bio ?? `Veja os pores do sol de ${user.name} no Sunsetsss.`,
       path: `/profile/${id}`,
       image: user.avatarUrl,
     });
   } catch {
-    return { title: "Perfil — Sunsetsss" };
+    return { title: "Perfil" };
   }
 }
 

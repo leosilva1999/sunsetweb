@@ -3,14 +3,15 @@ import { notFound } from "next/navigation";
 import { getUser, getUserFollowing } from "@/lib/api/auth";
 import BackButton from "@/components/ui/BackButton";
 import UserList from "@/components/profile/UserList";
+import { NO_INDEX } from "@/lib/utils/shareMetadata";
 
 export async function generateMetadata({ params }: PageProps<"/profile/[id]/following">): Promise<Metadata> {
   const { id } = await params;
   try {
     const user = await getUser(id);
-    return { title: `${user.name} segue — Sunsetsss` };
+    return { title: `${user.name} segue`, ...NO_INDEX };
   } catch {
-    return { title: "Seguindo — Sunsetsss" };
+    return { title: "Seguindo", ...NO_INDEX };
   }
 }
 
