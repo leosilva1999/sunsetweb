@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPhoto, getPhotoComments } from "@/lib/api/photos";
 import { getLocation } from "@/lib/api/locations";
 import BackButton from "@/components/ui/BackButton";
 import LikeButton from "@/components/photo/LikeButton";
 import PhotoActions from "@/components/photo/PhotoActions";
+import PhotoImage from "@/components/photo/PhotoImage";
 import PhotoAuthor from "@/components/photo/PhotoAuthor";
 import Comments from "@/components/photo/Comments";
 import ShareButton from "@/components/ui/ShareButton";
@@ -58,16 +58,12 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.4fr_1fr]">
         <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
-          {/* <img> de verdade (não background-image): é o que o Google Imagens indexa, e o alt
-              descreve a foto. unoptimized: a URL vem do storage da API, fora do remotePatterns. */}
-          <Image
+          {/* Foto principal da página: priority porque costuma ser o elemento do LCP. */}
+          <PhotoImage
             src={photo.imageUrl}
             alt={`Pôr do sol em ${photo.locationName}, ${photo.city}${photo.caption ? ` — ${photo.caption}` : ""}`}
-            fill
-            priority
-            unoptimized
             sizes="(min-width: 1024px) 58vw, 100vw"
-            className="object-cover"
+            priority
           />
           <LikeButton photoId={photo.id} initialLiked={photo.likedByCurrentUser} initialCount={photo.likesCount} />
         </div>

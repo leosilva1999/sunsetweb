@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Photo } from "@/types/photo";
 import LikeButtonView from "@/components/photo/LikeButtonView";
+import PhotoImage from "@/components/photo/PhotoImage";
 import { useLikePhoto } from "@/lib/hooks/useLikePhoto";
 
 interface PhotoCardProps {
@@ -21,15 +22,11 @@ export default function PhotoCard({ photo, big }: PhotoCardProps) {
       className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 light:border-line light:shadow-[0_2px_10px_rgba(74,43,99,0.05)] ${big ? "col-span-2 row-span-2" : ""}`}
     >
       <Link href={`/photos/${photo.id}`} className="relative block min-h-0 flex-1 overflow-hidden">
-        {/* <img> de verdade (não background-image): é o que o Google Imagens indexa, e o alt
-            descreve a foto. unoptimized: a URL vem do storage da API, fora do remotePatterns. */}
-        <Image
+        <PhotoImage
           src={photo.imageUrl}
           alt={`Pôr do sol em ${photo.locationName}, ${photo.city}${photo.caption ? ` — ${photo.caption}` : ""}`}
-          fill
-          unoptimized
-          sizes="(min-width: 768px) 25vw, 50vw"
-          className="object-cover"
+          // Grade de 2 colunas no celular e 4 no desktop; o cartão grande ocupa 2 colunas.
+          sizes={big ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 768px) 25vw, 50vw"}
         />
         <LikeButtonView liked={liked} onToggle={toggle} />
       </Link>
