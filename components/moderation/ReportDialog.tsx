@@ -21,12 +21,27 @@ const REASONS: { value: ReportReason; label: string }[] = [
   { value: "Other", label: "Outro" },
 ];
 
+// IncorrectInfo só faz sentido pra locais (pino, nome ou cidade errados) e vem primeiro.
+const INCORRECT_INFO_REASON: { value: ReportReason; label: string } = {
+  value: "IncorrectInfo",
+  label: "Informação incorreta (pino, nome ou cidade)",
+};
+
+const TARGET_LABELS: Record<ReportTargetType, string> = {
+  Photo: "foto",
+  Comment: "comentário",
+  Location: "local",
+  User: "usuário",
+};
+
 const DETAILS_MAX_LENGTH = 500;
 
 export default function ReportDialog({ targetType, targetId, triggerClassName, triggerLabel = "Denunciar" }: ReportDialogProps) {
   const { getAccessToken } = useAuth();
+  const reasons = targetType === "Location" ? [INCORRECT_INFO_REASON, ...REASONS] : REASONS;
+  const defaultReason = reasons[0].value;
   const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState<ReportReason>("Spam");
+  const [reason, setReason] = useState<ReportReason>(defaultReason);
   const [details, setDetails] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +51,7 @@ export default function ReportDialog({ targetType, targetId, triggerClassName, t
     setOpen(true);
     setDone(false);
     setError(null);
-    setReason("Spam");
+    setReason(defaultReason);
     setDetails("");
   };
 
@@ -53,7 +68,15 @@ export default function ReportDialog({ targetType, targetId, triggerClassName, t
       await createReport(targetType, targetId, reason, details.trim() || null, token);
       setDone(true);
     } catch (err) {
-      setError(err instanceof ApiError && err.status === 409 ? "Você já denunciou isso." : "Não foi possível enviar a denúncia agora.");
+      if (err instanceof ApiError && err.status === 409) {
+        setError(targetType === "User" ? "Você já denunciou este usuário ou não pode denunciar a si mesmo." : "Você já denunciou isso.");
+      } else if (err instanceof ApiError && err.status === 429) {
+        setError("Muitas denúncias em pouco tempo. Tente de novo mais tarde.");
+      } else if (err instanceof ApiError && err.status === 404) {
+        setError("Isso não existe mais.");
+      } else {
+        setError("Não foi possível enviar a denúncia agora.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -78,7 +101,7 @@ export default function ReportDialog({ targetType, targetId, triggerClassName, t
             className="w-full max-w-sm rounded-2xl border border-white/10 bg-dusk-900 p-6 light:border-line light:bg-paper"
           >
             <h2 id="report-dialog-title" className="mb-4 font-display text-lg font-semibold">
-              Denunciar {targetType === "Photo" ? "foto" : "comentário"}
+              Denunciar {TARGET_LABELS[targetType]}
             </h2>
 
             {done ? (
@@ -99,7 +122,7 @@ export default function ReportDialog({ targetType, targetId, triggerClassName, t
                   onChange={(event) => setReason(event.target.value as ReportReason)}
                   className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:focus:border-ink/40"
                 >
-                  {REASONS.map((r) => (
+                  {reasons.map((r) => (
                     <option key={r.value} value={r.value} className="bg-dusk-900 text-cream light:bg-paper light:text-ink">
                       {r.label}
                     </option>

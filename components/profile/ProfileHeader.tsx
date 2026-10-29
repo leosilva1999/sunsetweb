@@ -10,6 +10,7 @@ import EditProfileModal from "@/components/profile/EditProfileModal";
 import ProfileMenu from "@/components/profile/ProfileMenu";
 import FollowButton from "@/components/profile/FollowButton";
 import ShareButton from "@/components/ui/ShareButton";
+import ReportDialog from "@/components/moderation/ReportDialog";
 import { SITE_URL } from "@/lib/utils/siteUrl";
 import type { PublicUser } from "@/types/user";
 
@@ -96,6 +97,13 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
         <div className="flex items-center gap-3">
           <FollowButton userId={user.id} initialFollowing={user.isFollowedByCurrentUser} />
           {shareButton}
+          {authUser && (
+            <ReportDialog
+              targetType="User"
+              targetId={user.id}
+              triggerClassName="rounded-full border border-white/15 px-4 py-2.5 text-sm font-medium opacity-85 hover:opacity-100 light:border-ink/15"
+            />
+          )}
         </div>
       )}
 

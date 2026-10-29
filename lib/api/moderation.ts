@@ -10,8 +10,8 @@ export function createReport(
   details: string | null,
   token: string,
 ) {
-  const path = targetType === "Photo" ? `/photos/${targetId}/reports` : `/comments/${targetId}/reports`;
-  return apiFetch<Report>(path, {
+  const resource = { Photo: "photos", Comment: "comments", Location: "locations", User: "users" }[targetType];
+  return apiFetch<Report>(`/${resource}/${targetId}/reports`, {
     method: "POST",
     body: JSON.stringify({ reason, details }),
     token,
@@ -51,6 +51,19 @@ export function changeUserRole(userId: string, role: UserRole, token: string) {
     body: JSON.stringify({ role }),
     token,
   });
+}
+
+// until (ISO 8601 UTC) omitido = banimento permanente.
+export function banUser(userId: string, reason: string, until: string | null, token: string) {
+  return apiFetch<void>(`/moderation/users/${userId}/ban`, {
+    method: "POST",
+    body: JSON.stringify({ reason, ...(until ? { until } : {}) }),
+    token,
+  });
+}
+
+export function unbanUser(userId: string, token: string) {
+  return apiFetch<void>(`/moderation/users/${userId}/ban`, { method: "DELETE", token });
 }
 
 export function getModerationActions(token: string, cursor?: string, limit?: number) {

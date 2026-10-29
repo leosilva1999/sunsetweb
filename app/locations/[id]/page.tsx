@@ -6,6 +6,7 @@ import BackButton from "@/components/ui/BackButton";
 import PhotoGrid from "@/components/photo/PhotoGrid";
 import LocationRatings from "@/components/location/LocationRatings";
 import LocationMap from "@/components/location/LocationMap";
+import LocationReportButton from "@/components/location/LocationReportButton";
 
 export async function generateMetadata({ params }: PageProps<"/locations/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -76,6 +77,9 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
 
       <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Onde fica</h2>
       <LocationMap latitude={location.latitude} longitude={location.longitude} name={location.name} />
+      <div className="mt-4">
+        <LocationReportButton locationId={id} />
+      </div>
 
       <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Fotos do local</h2>
       {photos.items.length === 0 ? (

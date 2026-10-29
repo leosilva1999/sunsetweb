@@ -1,5 +1,6 @@
-export type ReportTargetType = "Photo" | "Comment";
-export type ReportReason = "Spam" | "Inappropriate" | "Harassment" | "Other";
+export type ReportTargetType = "Photo" | "Comment" | "Location" | "User";
+// IncorrectInfo é pensado pra locais ("o pino/nome/cidade está errado").
+export type ReportReason = "Spam" | "Inappropriate" | "Harassment" | "Other" | "IncorrectInfo";
 export type ReportStatus = "Pending" | "Resolved" | "Dismissed";
 
 export type ModerationActionType =
@@ -8,7 +9,14 @@ export type ModerationActionType =
   | "ReportResolved"
   | "ReportDismissed"
   | "LegalDocumentUpdated"
-  | "UserRoleChanged";
+  | "UserRoleChanged"
+  | "UserBanned"
+  | "UserUnbanned"
+  | "UserAnonymized"
+  | "LocationDeleted"
+  | "LocationRestored"
+  | "LocationCoordinatesChanged"
+  | "LocationMerged";
 
 export interface ModerationAction {
   id: string;

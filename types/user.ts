@@ -24,6 +24,9 @@ export interface User extends PublicUser {
   // false em contas criadas via Google (sem senha própria). Sessões salvas antes desse campo
   // existir chegam como undefined - trate só `=== false` como "sem senha".
   hasPassword?: boolean;
+  // Banimento (moderação). Ausentes em sessões salvas antes desses campos existirem.
+  isBanned?: boolean;
+  bannedUntil?: string | null;
 }
 
 export interface AvatarUploadUrl {

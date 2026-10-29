@@ -9,6 +9,7 @@ import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
 import { safeRedirectPath } from "@/lib/utils/safeRedirectPath";
+import { getBanMessage } from "@/lib/utils/banMessage";
 
 function RegisterForm() {
   const router = useRouter();
@@ -47,8 +48,8 @@ function RegisterForm() {
     try {
       await loginWithGoogle(idToken);
       router.push(safeRedirectPath(searchParams.get("redirect")));
-    } catch {
-      setError("Não foi possível continuar com o Google agora. Tente novamente.");
+    } catch (err) {
+      setError(getBanMessage(err) ?? "Não foi possível continuar com o Google agora. Tente novamente.");
     }
   };
 

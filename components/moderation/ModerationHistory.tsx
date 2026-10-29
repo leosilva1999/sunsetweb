@@ -16,6 +16,13 @@ const ACTION_LABELS: Record<ModerationActionType, string> = {
   ReportDismissed: "Denúncia descartada",
   LegalDocumentUpdated: "Documento legal atualizado",
   UserRoleChanged: "Papel de usuário alterado",
+  UserBanned: "Usuário banido",
+  UserUnbanned: "Banimento removido",
+  UserAnonymized: "Conta de usuário removida",
+  LocationDeleted: "Local excluído",
+  LocationRestored: "Local restaurado",
+  LocationCoordinatesChanged: "Coordenadas do local corrigidas",
+  LocationMerged: "Locais mesclados",
 };
 
 export default function ModerationHistory() {
@@ -162,6 +169,14 @@ function ActionTargetLink({ targetDescription }: { targetDescription: string }) 
     return (
       <Link href={`/profile/${rest}`} target="_blank" className={linkClassName}>
         Ver perfil
+      </Link>
+    );
+  }
+
+  if (prefix === "Location" && rest) {
+    return (
+      <Link href={`/locations/${rest}`} target="_blank" className={linkClassName}>
+        Ver local
       </Link>
     );
   }

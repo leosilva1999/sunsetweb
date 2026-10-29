@@ -2,8 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import Button from "@/components/ui/Button";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import BanUserDialog from "@/components/moderation/BanUserDialog";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { searchUsers, changeUserRole } from "@/lib/api/moderation";
+import { searchUsers, changeUserRole, unbanUser } from "@/lib/api/moderation";
+import { formatDate } from "@/lib/utils/formatDate";
 import type { User, UserRole } from "@/types/user";
 
 const ROLE_LABELS: Record<UserRole, string> = { User: "Usuário", Moderator: "Moderador", Admin: "Admin" };
@@ -18,9 +21,11 @@ export default function UserRoleManager() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [banTarget, setBanTarget] = useState<User | null>(null);
+  const [unbanTarget, setUnbanTarget] = useState<User | null>(null);
+  const [isUnbanning, setIsUnbanning] = useState(false);
 
-  const handleSearch = async (event: FormEvent) => {
-    event.preventDefault();
+  const loadUsers = async () => {
     setIsSearching(true);
     setError(null);
     try {
@@ -36,6 +41,39 @@ export default function UserRoleManager() {
       setError("Não foi possível buscar usuários agora.");
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleSearch = (event: FormEvent) => {
+    event.preventDefault();
+    return loadUsers();
+  };
+
+  // O ban/unban responde 204 sem corpo, então recarrega a lista pra mostrar o estado novo
+  // (inclusive a data de fim do ban temporário).
+  const handleBanned = () => {
+    setBanTarget(null);
+    return loadUsers();
+  };
+
+  const handleConfirmUnban = async () => {
+    if (!unbanTarget) return;
+    setIsUnbanning(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        setError("Sua sessão expirou. Entre novamente.");
+        return;
+      }
+      await unbanUser(unbanTarget.id, token);
+      setUnbanTarget(null);
+      await loadUsers();
+    } catch {
+      setError("Não foi possível remover o banimento agora.");
+      setUnbanTarget(null);
+    } finally {
+      setIsUnbanning(false);
     }
   };
 
@@ -100,6 +138,11 @@ export default function UserRoleManager() {
                     {isSelf && <span className="ml-2 font-mono text-xs opacity-60">(você)</span>}
                   </p>
                   <p className="font-mono text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">{u.email}</p>
+                  {u.isBanned && (
+                    <p className="mt-1 font-mono text-xs text-sun-deep">
+                      {u.bannedUntil ? `Banido até ${formatDate(u.bannedUntil)}` : "Banido permanentemente"}
+                    </p>
+                  )}
                 </div>
                 <select
                   value={pending}
@@ -121,11 +164,37 @@ export default function UserRoleManager() {
                 >
                   {savingId === u.id ? "Salvando..." : "Salvar"}
                 </button>
+                {/* Ninguém age sobre um Admin nem sobre si mesmo (a API responde 403). */}
+                {!isSelf && u.role !== "Admin" && (
+                  <button
+                    onClick={() => (u.isBanned ? setUnbanTarget(u) : setBanTarget(u))}
+                    className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
+                  >
+                    {u.isBanned ? "Remover banimento" : "Banir"}
+                  </button>
+                )}
               </li>
             );
           })}
         </ul>
       )}
+
+      <BanUserDialog
+        open={banTarget !== null}
+        userId={banTarget?.id ?? ""}
+        userName={banTarget?.name ?? ""}
+        onBanned={handleBanned}
+        onCancel={() => setBanTarget(null)}
+      />
+      <ConfirmDialog
+        open={unbanTarget !== null}
+        title={`Remover o banimento de ${unbanTarget?.name ?? ""}?`}
+        description="O usuário poderá entrar de novo na conta."
+        confirmLabel="Remover banimento"
+        isConfirming={isUnbanning}
+        onConfirm={handleConfirmUnban}
+        onCancel={() => setUnbanTarget(null)}
+      />
     </div>
   );
 }

@@ -4,13 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Tabs from "@/components/ui/Tabs";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import BanUserDialog from "@/components/moderation/BanUserDialog";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { getReports, resolveReport } from "@/lib/api/moderation";
 import { getPhoto, getComment, deletePhoto, deleteComment } from "@/lib/api/photos";
+import { getLocation } from "@/lib/api/locations";
+import { getUser } from "@/lib/api/auth";
 import { formatDate } from "@/lib/utils/formatDate";
-import type { Report, ReportStatus, ReportReason } from "@/types/report";
+import type { Report, ReportStatus, ReportReason, ReportTargetType } from "@/types/report";
 import type { Photo } from "@/types/photo";
 import type { Comment } from "@/types/comment";
+import type { Location } from "@/types/location";
+import type { PublicUser } from "@/types/user";
 
 const STATUS_LABELS: Record<ReportStatus, string> = {
   Pending: "Pendentes",
@@ -25,6 +30,14 @@ const REASON_LABELS: Record<ReportReason, string> = {
   Inappropriate: "Conteúdo impróprio",
   Harassment: "Assédio",
   Other: "Outro",
+  IncorrectInfo: "Informação incorreta",
+};
+
+const TARGET_LABELS: Record<ReportTargetType, string> = {
+  Photo: "Foto",
+  Comment: "Comentário",
+  Location: "Local",
+  User: "Usuário",
 };
 
 export default function ReportsQueue() {
@@ -38,6 +51,7 @@ export default function ReportsQueue() {
   const [error, setError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<{ report: Report; kind: "resolve" | "dismiss" | "delete" } | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [banReport, setBanReport] = useState<Report | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -84,6 +98,22 @@ export default function ReportsQueue() {
   };
 
   const removeFromList = (reportId: string) => setReports((prev) => prev.filter((r) => r.id !== reportId));
+
+  // O ban em si já foi feito pelo BanUserDialog; aqui só fecha a denúncia (resolver a
+  // denúncia não age sobre o alvo, então o ban precisa vir antes).
+  const handleBanned = async () => {
+    if (!banReport) return;
+    const report = banReport;
+    setBanReport(null);
+    try {
+      const token = await getAccessToken();
+      if (token) await resolveReport(report.id, "Resolved", token);
+    } catch {
+      setError("O usuário foi banido, mas não foi possível marcar a denúncia como resolvida.");
+      return;
+    }
+    removeFromList(report.id);
+  };
 
   const handleConfirm = async () => {
     if (!pendingAction) return;
@@ -142,7 +172,7 @@ export default function ReportsQueue() {
             <li key={report.id} className="rounded-2xl border border-white/10 p-4 light:border-line">
               <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
                 <span className="rounded-full bg-cream/15 px-2.5 py-1 font-mono uppercase light:bg-ink/10">
-                  {report.targetType === "Photo" ? "Foto" : "Comentário"}
+                  {TARGET_LABELS[report.targetType]}
                 </span>
                 <span className="font-mono text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
                   {REASON_LABELS[report.reason]}
@@ -172,12 +202,22 @@ export default function ReportsQueue() {
                   >
                     Descartar
                   </button>
-                  <button
-                    onClick={() => setPendingAction({ report, kind: "delete" })}
-                    className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
-                  >
-                    Excluir conteúdo
-                  </button>
+                  {(report.targetType === "Photo" || report.targetType === "Comment") && (
+                    <button
+                      onClick={() => setPendingAction({ report, kind: "delete" })}
+                      className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
+                    >
+                      Excluir conteúdo
+                    </button>
+                  )}
+                  {report.targetType === "User" && (
+                    <button
+                      onClick={() => setBanReport(report)}
+                      className="rounded-full border border-sun-deep/40 px-4 py-2 text-xs font-medium text-sun-deep hover:bg-sun-deep/10"
+                    >
+                      Banir usuário
+                    </button>
+                  )}
                 </div>
               )}
             </li>
@@ -204,13 +244,23 @@ export default function ReportsQueue() {
         onConfirm={handleConfirm}
         onCancel={() => setPendingAction(null)}
       />
+
+      <BanUserDialog
+        open={banReport !== null}
+        userId={banReport?.targetId ?? ""}
+        userName="este usuário"
+        onBanned={handleBanned}
+        onCancel={() => setBanReport(null)}
+      />
     </div>
   );
 }
 
-function ReportTargetPreview({ targetType, targetId }: { targetType: "Photo" | "Comment"; targetId: string }) {
+function ReportTargetPreview({ targetType, targetId }: { targetType: ReportTargetType; targetId: string }) {
   const [photo, setPhoto] = useState<Photo | null>(null);
   const [comment, setComment] = useState<Comment | null>(null);
+  const [location, setLocation] = useState<Location | null>(null);
+  const [targetUser, setTargetUser] = useState<PublicUser | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
@@ -220,9 +270,15 @@ function ReportTargetPreview({ targetType, targetId }: { targetType: "Photo" | "
         if (targetType === "Photo") {
           const result = await getPhoto(targetId);
           if (!cancelled) setPhoto(result);
-        } else {
+        } else if (targetType === "Comment") {
           const result = await getComment(targetId);
           if (!cancelled) setComment(result);
+        } else if (targetType === "Location") {
+          const result = await getLocation(targetId);
+          if (!cancelled) setLocation(result);
+        } else {
+          const result = await getUser(targetId);
+          if (!cancelled) setTargetUser(result);
         }
       } catch {
         if (!cancelled) setNotFound(true);
@@ -236,6 +292,24 @@ function ReportTargetPreview({ targetType, targetId }: { targetType: "Photo" | "
 
   if (notFound) {
     return <p className="text-xs text-cream-dim opacity-60 italic light:text-ink-dim light:opacity-100">Conteúdo não encontrado (já excluído?).</p>;
+  }
+
+  if (targetType === "Location") {
+    if (!location) return null;
+    return (
+      <Link href={`/locations/${location.id}`} target="_blank" className="text-sm underline">
+        {location.name} — {location.city}
+      </Link>
+    );
+  }
+
+  if (targetType === "User") {
+    if (!targetUser) return null;
+    return (
+      <Link href={`/profile/${targetUser.id}`} target="_blank" className="text-sm underline">
+        {targetUser.name}
+      </Link>
+    );
   }
 
   if (targetType === "Photo") {
