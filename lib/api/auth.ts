@@ -1,6 +1,7 @@
 import { apiFetch } from "@/lib/api/client";
 import type { User, PublicUser, AvatarUploadUrl } from "@/types/user";
 import type { Photo } from "@/types/photo";
+import type { LegalAcceptance, LegalVersions } from "@/types/legalDocument";
 import type { CursorPage } from "@/types/pagination";
 
 export interface AuthResponse {
@@ -8,9 +9,13 @@ export interface AuthResponse {
   refreshToken: string;
   expiresAt: string;
   user: User;
+  // Ausente em sessões salvas antes do campo existir - ver LegalAcceptanceGate.
+  legalAcceptance?: LegalAcceptance;
 }
 
-export function register(data: { name: string; email: string; password: string }) {
+// termsVersion/privacyVersion: as versões que a pessoa viu ao aceitar. Opcionais na API; sem
+// elas a conta nasce "pendente" e o LegalAcceptanceGate pede o aceite depois.
+export function register(data: { name: string; email: string; password: string } & Partial<LegalVersions>) {
   return apiFetch<AuthResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
@@ -24,10 +29,10 @@ export function login(data: { email: string; password: string }) {
   });
 }
 
-export function loginWithGoogle(idToken: string) {
+export function loginWithGoogle(idToken: string, versions?: LegalVersions) {
   return apiFetch<AuthResponse>("/auth/google", {
     method: "POST",
-    body: JSON.stringify({ idToken }),
+    body: JSON.stringify({ idToken, ...versions }),
   });
 }
 

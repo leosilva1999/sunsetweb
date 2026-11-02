@@ -10,6 +10,7 @@ interface RequestOptions extends RequestInit {
 interface ApiErrorBody {
   title: string;
   errors: Record<string, string[]> | null;
+  requestId: string | null;
 }
 
 export class ApiError extends Error {
@@ -17,6 +18,8 @@ export class ApiError extends Error {
     public status: number,
     message: string,
     public fieldErrors: Record<string, string[]> | null = null,
+    // Chave dos logs da API pra essa requisição (corpo de erro ou header X-Request-Id).
+    public requestId: string | null = null,
   ) {
     super(message);
     this.name = "ApiError";
@@ -31,9 +34,10 @@ async function parseErrorBody(response: Response): Promise<ApiErrorBody> {
     return {
       title: body.title ?? (response.statusText || "Erro inesperado"),
       errors: body.errors ?? null,
+      requestId: body.requestId ?? null,
     };
   } catch {
-    return { title: response.statusText || "Erro inesperado", errors: null };
+    return { title: response.statusText || "Erro inesperado", errors: null, requestId: null };
   }
 }
 
@@ -64,8 +68,11 @@ export async function apiFetch<T>(
   }
 
   if (!response.ok) {
-    const { title, errors } = await parseErrorBody(response);
-    const context = { ...logContext, status: response.status, title };
+    const body = await parseErrorBody(response);
+    const { title, errors } = body;
+    // 401/403 vêm sem corpo; o header X-Request-Id está em toda resposta.
+    const requestId = body.requestId ?? response.headers.get("X-Request-Id");
+    const context = { ...logContext, status: response.status, title, requestId };
     if (response.status >= 500) {
       logger.error("A API respondeu com erro de servidor", undefined, context);
     } else if (EXPECTED_CLIENT_ERRORS.has(response.status)) {
@@ -73,7 +80,7 @@ export async function apiFetch<T>(
     } else {
       logger.warn("A API recusou a requisição", { ...context, fieldErrors: errors });
     }
-    throw new ApiError(response.status, title, errors);
+    throw new ApiError(response.status, title, errors, requestId);
   }
 
   if (response.status === 204) {

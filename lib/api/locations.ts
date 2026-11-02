@@ -27,8 +27,16 @@ export function getLocation(id: string) {
   return apiFetch<Location>(`/locations/${id}`);
 }
 
+// POST /locations responde 409 quando acha um local que pode ser o mesmo; os ids vêm em
+// errors.candidateLocationIds. Reenviar o mesmo corpo com confirmDistinct: true cria assim mesmo.
+export function getDuplicateCandidateIds(err: unknown): string[] | null {
+  if (!(err instanceof ApiError) || err.status !== 409) return null;
+  const ids = err.fieldErrors?.candidateLocationIds;
+  return ids && ids.length > 0 ? ids : null;
+}
+
 export function createLocation(
-  data: { name: string; latitude: number; longitude: number; city: string },
+  data: { name: string; latitude: number; longitude: number; city: string; confirmDistinct?: boolean },
   token: string,
 ) {
   return apiFetch<Location>("/locations", {

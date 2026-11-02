@@ -5,8 +5,8 @@ import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
 import MapPicker from "@/components/location/MapPicker";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { searchLocations, createLocation } from "@/lib/api/locations";
-import { ApiError } from "@/lib/api/client";
+import { searchLocations, createLocation, getLocation, getDuplicateCandidateIds } from "@/lib/api/locations";
+import { getApiErrorMessage } from "@/lib/utils/apiErrorMessage";
 import type { Location } from "@/types/location";
 
 interface NewLocationModalProps {
@@ -27,6 +27,9 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [duplicates, setDuplicates] = useState<Location[]>([]);
   const [duplicatesDismissed, setDuplicatesDismissed] = useState(false);
+  // A API já apontou possível duplicata pra este nome/posição: dispensar a lista passa a
+  // significar "é outro lugar" e o reenvio leva confirmDistinct.
+  const [serverFlagged, setServerFlagged] = useState(false);
   const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +45,7 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
       setPosition(null);
       setDuplicates([]);
       setDuplicatesDismissed(false);
+      setServerFlagged(false);
       setError(null);
     }
   }
@@ -64,6 +68,7 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
   if (duplicateCheckKey !== lastDuplicateCheckKey) {
     setLastDuplicateCheckKey(duplicateCheckKey);
     setDuplicatesDismissed(false);
+    setServerFlagged(false);
     setDuplicates([]);
   }
 
@@ -101,6 +106,20 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
 
   const hasPendingDuplicates = duplicates.length > 0 && !duplicatesDismissed;
 
+  // A checagem do servidor é a oficial (150 m ou mesmo nome no município): troca a lista da
+  // busca do cliente pelos candidatos dela e exige uma nova decisão.
+  const showServerCandidates = async (ids: string[]) => {
+    const results = await Promise.allSettled(ids.map((id) => getLocation(id)));
+    const candidates = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+    if (candidates.length === 0) {
+      setError("Já existe um local parecido com este. Confira a busca antes de criar um novo.");
+      return;
+    }
+    setDuplicates(candidates);
+    setDuplicatesDismissed(false);
+    setServerFlagged(true);
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!position) {
@@ -118,12 +137,23 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
         return;
       }
       const location = await createLocation(
-        { name: name.trim(), city: city.trim(), latitude: position.lat, longitude: position.lng },
+        {
+          name: name.trim(),
+          city: city.trim(),
+          latitude: position.lat,
+          longitude: position.lng,
+          ...(serverFlagged ? { confirmDistinct: true } : {}),
+        },
         token,
       );
       onCreated(location);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Não foi possível criar o local agora.");
+      const candidateIds = getDuplicateCandidateIds(err);
+      if (candidateIds) {
+        await showServerCandidates(candidateIds);
+      } else {
+        setError(getApiErrorMessage(err, "Não foi possível criar o local agora."));
+      }
     } finally {
       setIsSubmitting(false);
     }

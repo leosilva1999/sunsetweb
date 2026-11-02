@@ -3,6 +3,8 @@
 import { useCallback, useSyncExternalStore } from "react";
 import * as authApi from "@/lib/api/auth";
 import type { AuthResponse } from "@/lib/api/auth";
+import { acceptLegal } from "@/lib/api/legalDocuments";
+import type { LegalVersions } from "@/types/legalDocument";
 
 const AUTH_STORAGE_KEY = "sunset_auth";
 const listeners = new Set<() => void>();
@@ -90,14 +92,14 @@ export function useAuth() {
     return result;
   }, []);
 
-  const register = useCallback(async (name: string, email: string, password: string) => {
-    const result = await authApi.register({ name, email, password });
+  const register = useCallback(async (name: string, email: string, password: string, versions?: LegalVersions) => {
+    const result = await authApi.register({ name, email, password, ...versions });
     writeAuth(result);
     return result;
   }, []);
 
-  const loginWithGoogle = useCallback(async (idToken: string) => {
-    const result = await authApi.loginWithGoogle(idToken);
+  const loginWithGoogle = useCallback(async (idToken: string, versions?: LegalVersions) => {
+    const result = await authApi.loginWithGoogle(idToken, versions);
     writeAuth(result);
     return result;
   }, []);
@@ -150,6 +152,20 @@ export function useAuth() {
     [getAccessToken],
   );
 
+  // Registra o aceite dos Termos/Privacidade nas versões mostradas e guarda a situação nova.
+  const acceptLegalDocuments = useCallback(
+    async (versions: LegalVersions) => {
+      const token = await getAccessToken();
+      const current = readAuth();
+      if (!token || !current) throw new Error("not authenticated");
+
+      const legalAcceptance = await acceptLegal(versions, token);
+      writeAuth({ ...current, legalAcceptance });
+      return legalAcceptance;
+    },
+    [getAccessToken],
+  );
+
   const deleteAccount = useCallback(async () => {
     const token = await getAccessToken();
     if (!token) throw new Error("not authenticated");
@@ -162,6 +178,7 @@ export function useAuth() {
     user: auth?.user ?? null,
     token: auth?.accessToken ?? null,
     isAuthenticated: auth !== null,
+    legalAcceptance: auth?.legalAcceptance ?? null,
     login,
     register,
     loginWithGoogle,
@@ -169,6 +186,7 @@ export function useAuth() {
     getAccessToken,
     updateProfile,
     changePassword,
+    acceptLegalDocuments,
     deleteAccount,
   };
 }

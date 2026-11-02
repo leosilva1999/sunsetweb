@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useCallback, useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -10,6 +10,15 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
 import { safeRedirectPath } from "@/lib/utils/safeRedirectPath";
 import { getBanMessage } from "@/lib/utils/banMessage";
+import { getApiErrorMessage } from "@/lib/utils/apiErrorMessage";
+import { getCurrentLegalVersions } from "@/lib/api/legalDocuments";
+import type { LegalVersions } from "@/types/legalDocument";
+
+// 400 com TermsVersion/PrivacyVersion = saiu um texto novo enquanto a pessoa preenchia.
+function isStaleLegalVersion(err: unknown): boolean {
+  if (!(err instanceof ApiError) || err.status !== 400 || !err.fieldErrors) return false;
+  return Object.keys(err.fieldErrors).some((key) => /^(terms|privacy)version$/i.test(key));
+}
 
 function RegisterForm() {
   const router = useRouter();
@@ -20,23 +29,41 @@ function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accepted, setAccepted] = useState(false);
+  // Versões dos textos que a pessoa está aceitando. Se não carregarem, o cadastro segue sem
+  // elas (a API aceita) e o aceite é pedido logo depois pelo LegalAcceptanceGate.
+  const [versions, setVersions] = useState<LegalVersions | undefined>();
+
+  const loadVersions = useCallback(async () => {
+    try {
+      setVersions(await getCurrentLegalVersions());
+    } catch {
+      setVersions(undefined);
+    }
+  }, []);
+
+  useEffect(() => {
+    getCurrentLegalVersions().then(setVersions, () => {});
+  }, []);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
     setError(null);
     try {
-      await register(name, email, password);
+      await register(name, email, password, versions);
       router.push(safeRedirectPath(searchParams.get("redirect")));
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) {
+      if (isStaleLegalVersion(err)) {
+        await loadVersions();
+        setAccepted(false);
+        setError("Os Termos de Uso ou a Política de Privacidade foram atualizados. Leia de novo e confirme o aceite.");
+      } else if (err instanceof ApiError && err.status === 409) {
         setError("Este e-mail já está cadastrado.");
       } else if (err instanceof ApiError && err.fieldErrors) {
         setError(Object.values(err.fieldErrors).flat().join(" "));
-      } else if (err instanceof ApiError) {
-        setError(err.message);
       } else {
-        setError("Não foi possível criar a conta. Tente novamente.");
+        setError(getApiErrorMessage(err, "Não foi possível criar a conta. Tente novamente."));
       }
     } finally {
       setIsSubmitting(false);
@@ -46,10 +73,15 @@ function RegisterForm() {
   const handleGoogleCredential = async (idToken: string) => {
     setError(null);
     try {
-      await loginWithGoogle(idToken);
+      await loginWithGoogle(idToken, versions);
       router.push(safeRedirectPath(searchParams.get("redirect")));
     } catch (err) {
-      setError(getBanMessage(err) ?? "Não foi possível continuar com o Google agora. Tente novamente.");
+      if (isStaleLegalVersion(err)) {
+        await loadVersions();
+        setError("Os Termos de Uso ou a Política de Privacidade foram atualizados. Leia de novo e tente outra vez.");
+        return;
+      }
+      setError(getBanMessage(err) ?? getApiErrorMessage(err, "Não foi possível continuar com o Google agora. Tente novamente."));
     }
   };
 
@@ -87,6 +119,8 @@ function RegisterForm() {
           <input
             type="checkbox"
             required
+            checked={accepted}
+            onChange={(event) => setAccepted(event.target.checked)}
             className="mt-0.5 h-4 w-4 shrink-0 accent-sun-core"
           />
           <span>
