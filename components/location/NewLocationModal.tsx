@@ -6,8 +6,12 @@ import Button from "@/components/ui/Button";
 import MapPicker from "@/components/location/MapPicker";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { searchLocations, createLocation, getLocation, getDuplicateCandidateIds } from "@/lib/api/locations";
+import CityPicker from "@/components/city/CityPicker";
+import { getGeoCities } from "@/lib/api/cities";
 import { getApiErrorMessage } from "@/lib/utils/apiErrorMessage";
-import type { Location } from "@/types/location";
+import { LOCATION_CATEGORIES, categoryLabel } from "@/lib/utils/locationCategory";
+import { cityLabel, type CityOption } from "@/lib/utils/cityLabel";
+import type { Location, LocationCategory } from "@/types/location";
 
 interface NewLocationModalProps {
   open: boolean;
@@ -19,11 +23,21 @@ interface NewLocationModalProps {
 
 const DUPLICATE_RADIUS_KM = 0.5;
 const DEBOUNCE_MS = 400;
+const DESCRIPTION_MAX_LENGTH = 1000;
+
+const FIELD_CLASS =
+  "rounded-2xl border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40";
 
 export default function NewLocationModal({ open, initialName, onCreated, onSelectExisting, onCancel }: NewLocationModalProps) {
   const { getAccessToken } = useAuth();
   const [name, setName] = useState(initialName);
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState<CityOption | null>(null);
+  // Enquanto a pessoa não escolhe a cidade, ela segue o pino (a mais próxima); depois de escolher, fica.
+  const [cityChosenByUser, setCityChosenByUser] = useState(false);
+  // Pino a mais de 150 km do centro da cidade escolhida: aviso, nunca bloqueio.
+  const [cityFarAway, setCityFarAway] = useState<number | null>(null);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<LocationCategory | "">("");
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [duplicates, setDuplicates] = useState<Location[]>([]);
   const [duplicatesDismissed, setDuplicatesDismissed] = useState(false);
@@ -41,7 +55,11 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
     setWasOpen(open);
     if (open) {
       setName(initialName);
-      setCity("");
+      setCity(null);
+      setCityChosenByUser(false);
+      setCityFarAway(null);
+      setDescription("");
+      setCategory("");
       setPosition(null);
       setDuplicates([]);
       setDuplicatesDismissed(false);
@@ -102,7 +120,41 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
     return () => clearTimeout(timeoutId);
   }, [open, trimmedName, position]);
 
+  // Ao posicionar/mover o pino: sugere a cidade mais próxima (se a pessoa ainda não escolheu uma)
+  // e, se escolheu, checa a distância até ela. Best-effort, como a checagem de duplicatas.
+  const chosenCityId = cityChosenByUser ? city?.id : undefined;
+  useEffect(() => {
+    if (!open || !position) return;
+
+    let cancelled = false;
+    const timeoutId = setTimeout(async () => {
+      try {
+        const result = await getGeoCities(position.lat, position.lng, { limit: 3, cityId: chosenCityId });
+        if (cancelled) return;
+        if (chosenCityId) {
+          setCityFarAway(result.chosenCity?.farAway ? Math.round(result.chosenCity.distanceKm) : null);
+        } else {
+          setCityFarAway(null);
+          if (result.items[0]) setCity(result.items[0]);
+        }
+      } catch {
+        // Sem sugestão a pessoa ainda pode buscar a cidade à mão.
+      }
+    }, DEBOUNCE_MS);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [open, position, chosenCityId]);
+
   if (!open) return null;
+
+  const handleCitySelect = (selected: CityOption) => {
+    setCity(selected);
+    setCityChosenByUser(true);
+    setCityFarAway(null);
+  };
 
   const hasPendingDuplicates = duplicates.length > 0 && !duplicatesDismissed;
 
@@ -126,6 +178,10 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
       setError("Posicione o local no mapa.");
       return;
     }
+    if (!city) {
+      setError("Escolha a cidade do local.");
+      return;
+    }
     if (hasPendingDuplicates) return;
 
     setIsSubmitting(true);
@@ -139,9 +195,11 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
       const location = await createLocation(
         {
           name: name.trim(),
-          city: city.trim(),
+          cityId: city.id,
           latitude: position.lat,
           longitude: position.lng,
+          ...(description.trim() ? { description: description.trim() } : {}),
+          ...(category ? { category } : {}),
           ...(serverFlagged ? { confirmDistinct: true } : {}),
         },
         token,
@@ -184,16 +242,47 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
             required
             className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
           />
-          <input
-            type="text"
-            value={city}
-            onChange={(event) => setCity(event.target.value)}
-            placeholder="Cidade"
-            required
-            className="rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
-          />
 
           <MapPicker latitude={position?.lat ?? null} longitude={position?.lng ?? null} onChange={(lat, lng) => setPosition({ lat, lng })} />
+
+          <CityPicker value={city} onSelect={handleCitySelect} />
+          {city && !cityChosenByUser && (
+            <p className="-mt-2 px-2 text-xs text-cream-dim opacity-80 light:text-ink-dim light:opacity-100">
+              Sugerida pelo pino no mapa. Use &quot;Trocar&quot; se não for essa.
+            </p>
+          )}
+          {cityFarAway !== null && city && (
+            <p className="-mt-2 px-2 text-xs text-sun-deep">
+              O pino está a cerca de {cityFarAway} km de {cityLabel(city)}. Confira se a cidade e a posição estão certas — você ainda pode continuar.
+            </p>
+          )}
+
+          <select
+            value={category}
+            onChange={(event) => setCategory(event.target.value as LocationCategory | "")}
+            aria-label="Tipo de local"
+            className={FIELD_CLASS}
+          >
+            <option value="">Tipo de local (opcional)</option>
+            {LOCATION_CATEGORIES.map((value) => (
+              <option key={value} value={value}>
+                {categoryLabel(value)}
+              </option>
+            ))}
+          </select>
+          <div>
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              maxLength={DESCRIPTION_MAX_LENGTH}
+              rows={3}
+              placeholder="Descrição (opcional): como chegar, melhor época, o que esperar..."
+              className={`w-full resize-none ${FIELD_CLASS}`}
+            />
+            <p className="mt-1 text-right font-mono text-xs text-cream-dim opacity-70 light:text-ink-dim light:opacity-100">
+              {description.length}/{DESCRIPTION_MAX_LENGTH}
+            </p>
+          </div>
 
           {(duplicates.length > 0 || isCheckingDuplicates) && (
             <div className="rounded-2xl border border-sun-deep/40 bg-sun-deep/10 p-4">
