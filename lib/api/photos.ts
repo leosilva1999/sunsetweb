@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
+import { tagged } from "@/lib/api/tags";
 import type { Photo, PhotoUploadUrl } from "@/types/photo";
 import type { Comment } from "@/types/comment";
 import type { CursorPage } from "@/types/pagination";
@@ -9,15 +10,15 @@ export function getPhotos(sort: "recent" | "top" = "recent", cursor?: string, li
     ...(cursor ? { cursor } : {}),
     ...(limit ? { limit: String(limit) } : {}),
   });
-  return apiFetch<CursorPage<Photo>>(`/photos?${query}`);
+  return apiFetch<CursorPage<Photo>>(`/photos?${query}`, tagged("photos"));
 }
 
 export function getPhotoCount() {
-  return apiFetch<{ count: number }>("/photos/count");
+  return apiFetch<{ count: number }>("/photos/count", tagged("photos"));
 }
 
 export function getPhoto(id: string, token?: string | null) {
-  return apiFetch<Photo>(`/photos/${id}`, { token });
+  return apiFetch<Photo>(`/photos/${id}`, { token, ...tagged("photos") });
 }
 
 export function createPhoto(

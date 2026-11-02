@@ -3,6 +3,11 @@ import { logger } from "@/lib/utils/logger";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:7044/api/v1";
 
+// Chave do servidor do site (sem NEXT_PUBLIC_, nunca vai pro navegador): dá ao Next um balde
+// de rate limit próprio na API, em vez de dividir um só entre todos os visitantes que ele
+// atende. Só abre capacidade, não autentica nada. A API ignora chave errada ou ausente.
+const SERVICE_API_KEY = typeof window === "undefined" ? process.env.SERVICE_API_KEY : undefined;
+
 interface RequestOptions extends RequestInit {
   token?: string | null;
 }
@@ -59,6 +64,7 @@ export async function apiFetch<T>(
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(SERVICE_API_KEY ? { "X-Service-Key": SERVICE_API_KEY } : {}),
         ...headers,
       },
     });

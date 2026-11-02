@@ -12,6 +12,10 @@ export interface Photo {
   likedByCurrentUser: boolean;
   commentsCount: number;
   createdAt: string;
+  // Tamanho em pixels como exibida (já com a orientação aplicada). null em fotos enviadas
+  // antes da API registrar - trate como desconhecido.
+  width: number | null;
+  height: number | null;
 }
 
 export interface PhotoUploadUrl {

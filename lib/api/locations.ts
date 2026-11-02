@@ -1,5 +1,6 @@
 import { apiFetch, ApiError } from "@/lib/api/client";
-import type { Location, SunsetTime } from "@/types/location";
+import { tagged } from "@/lib/api/tags";
+import type { Location, LocationCategory, SunsetTime } from "@/types/location";
 import type { Photo } from "@/types/photo";
 import type { CursorPage } from "@/types/pagination";
 import type { Rating, RatingScore } from "@/types/rating";
@@ -20,11 +21,22 @@ export function searchLocations(params: LocationSearchParams = {}) {
       .map(([key, value]) => [key, String(value)]),
   );
   const suffix = query.size > 0 ? `?${query}` : "";
-  return apiFetch<CursorPage<Location>>(`/locations${suffix}`);
+  return apiFetch<CursorPage<Location>>(`/locations${suffix}`, tagged("locations"));
 }
 
-export function getLocation(id: string) {
-  return apiFetch<Location>(`/locations/${id}`);
+// idOrSlug: o GUID ou o slug público do local.
+export function getLocation(idOrSlug: string) {
+  return apiFetch<Location>(`/locations/${idOrSlug}`, tagged("locations"));
+}
+
+// Outros locais num raio do local (mais perto primeiro), cada um com distanceKm. Sem paginação.
+export function getNearbyLocations(idOrSlug: string, radiusKm?: number, limit?: number) {
+  const query = new URLSearchParams({
+    ...(radiusKm ? { radiusKm: String(radiusKm) } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<Location[]>(`/locations/${idOrSlug}/nearby${suffix}`, tagged("locations"));
 }
 
 // POST /locations responde 409 quando acha um local que pode ser o mesmo; os ids vêm em
@@ -36,7 +48,17 @@ export function getDuplicateCandidateIds(err: unknown): string[] | null {
 }
 
 export function createLocation(
-  data: { name: string; latitude: number; longitude: number; city: string; confirmDistinct?: boolean },
+  data: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    // cityId (de GET /cities) é o caminho certo; city em texto livre segue aceito.
+    cityId?: string;
+    city?: string;
+    description?: string;
+    category?: LocationCategory;
+    confirmDistinct?: boolean;
+  },
   token: string,
 ) {
   return apiFetch<Location>("/locations", {
@@ -52,16 +74,23 @@ export function getLocationPhotos(id: string, cursor?: string, limit?: number) {
     ...(limit ? { limit: String(limit) } : {}),
   });
   const suffix = query.size > 0 ? `?${query}` : "";
-  return apiFetch<CursorPage<Photo>>(`/locations/${id}/photos${suffix}`);
+  return apiFetch<CursorPage<Photo>>(`/locations/${id}/photos${suffix}`, tagged("photos"));
 }
 
-export function getLocationRanking(period?: "week" | "month" | "all", limit?: number) {
+// citySlug: município (inclui as localidades dele) ou localidade; state: sigla (ex.: "SC").
+export function getLocationRanking(
+  period?: "week" | "month" | "all",
+  limit?: number,
+  filters: { citySlug?: string; state?: string } = {},
+) {
   const query = new URLSearchParams({
     ...(period ? { period } : {}),
     ...(limit ? { limit: String(limit) } : {}),
+    ...(filters.citySlug ? { citySlug: filters.citySlug } : {}),
+    ...(filters.state ? { state: filters.state } : {}),
   });
   const suffix = query.size > 0 ? `?${query}` : "";
-  return apiFetch<Location[]>(`/locations/ranking${suffix}`);
+  return apiFetch<Location[]>(`/locations/ranking${suffix}`, tagged("locations"));
 }
 
 export function getLocationSunset(id: string, date?: string) {
@@ -75,7 +104,7 @@ export function getLocationRatings(id: string, cursor?: string, limit?: number) 
     ...(limit ? { limit: String(limit) } : {}),
   });
   const suffix = query.size > 0 ? `?${query}` : "";
-  return apiFetch<CursorPage<Rating>>(`/locations/${id}/ratings${suffix}`);
+  return apiFetch<CursorPage<Rating>>(`/locations/${id}/ratings${suffix}`, tagged("locations"));
 }
 
 // 404 aqui significa "ainda não avaliou", não uma falha — devolve null nesse

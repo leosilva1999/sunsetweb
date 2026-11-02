@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
     // URL no servidor, então liberar qualquer host seria um proxy aberto de imagens.
     remotePatterns: [{ protocol: "https", hostname: STORAGE_HOSTNAME, pathname: "/photos/**" }],
   },
+  async rewrites() {
+    return [
+      // IndexNow exige o arquivo de chave na raiz ("/{chave}.txt", 8 a 128 letras, números e
+      // hífens). O handler só responde se a chave bater com INDEXNOW_KEY.
+      { source: "/:key([A-Za-z0-9-]{8,128})\\.txt", destination: "/api/indexnow/:key" },
+    ];
+  },
   async headers() {
     return [
       {
