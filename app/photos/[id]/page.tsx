@@ -16,6 +16,10 @@ import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbJsonLd, photoJsonLd } from "@/lib/utils/structuredData";
 import { locationPath } from "@/lib/utils/locationPath";
 
+// Página em cache por 60 s (ISR); quando a API avisa uma mudança, POST /api/revalidate
+// invalida na hora pelas tags dos fetches.
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: PageProps<"/photos/[id]">): Promise<Metadata> {
   const { id } = await params;
   try {

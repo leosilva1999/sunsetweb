@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { getLocation, getLocationPhotos, getLocationRatings, getLocationSunset } from "@/lib/api/locations";
-import { formatTime } from "@/lib/utils/formatDate";
+import { getLocation, getLocationPhotos, getLocationRatings, getLocationSunset, getNearbyLocations } from "@/lib/api/locations";
 import BackButton from "@/components/ui/BackButton";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import SunsetTimeCard from "@/components/location/SunsetTimeCard";
+import NearbyLocations from "@/components/location/NearbyLocations";
 import PhotoGrid from "@/components/photo/PhotoGrid";
 import LocationRatings from "@/components/location/LocationRatings";
 import LocationMap from "@/components/location/LocationMap";
@@ -12,6 +15,12 @@ import JsonLd from "@/components/seo/JsonLd";
 import { buildPageMetadata } from "@/lib/utils/shareMetadata";
 import { breadcrumbJsonLd, placeJsonLd } from "@/lib/utils/structuredData";
 import { locationPath } from "@/lib/utils/locationPath";
+import { cityPath } from "@/lib/utils/cityPath";
+import { categoryLabel } from "@/lib/utils/locationCategory";
+
+// Página em cache por 60 s (ISR); quando a API avisa uma mudança, POST /api/revalidate
+// invalida na hora pelas tags dos fetches.
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: PageProps<"/locations/[id]">): Promise<Metadata> {
   // O segmento da URL é o slug (ou o GUID, de links antigos: a página redireciona pro slug).
@@ -50,30 +59,51 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
 
   // As demais rotas do local são por id.
   const id = location.id;
-  const [photos, ratings, sunset] = await Promise.all([
+  const [photos, ratings, sunset, nearby] = await Promise.all([
     getLocationPhotos(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
     getLocationRatings(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
     // sunrise-sunset.org é um serviço externo — indisponibilidade dele não pode
     // derrubar a página do local, só omitir esse bloco.
     getLocationSunset(id).catch(() => null),
+    getNearbyLocations(id, undefined, 6).catch(() => []),
   ]);
+
+  // Trilha até a cidade (e a localidade, quando há): links internos pras páginas de cidade e,
+  // sem cidade no catálogo, a trilha antiga por "Locais".
+  const crumbs = [
+    { name: "Início", href: "/" },
+    ...(location.citySlug && location.cityName
+      ? [
+          { name: "Cidades", href: "/cidades" },
+          { name: location.cityName, href: cityPath({ slug: location.citySlug }) },
+          ...(location.localitySlug && location.localityName
+            ? [{ name: location.localityName, href: cityPath({ slug: location.localitySlug }) }]
+            : []),
+        ]
+      : [{ name: "Locais", href: "/locations" }]),
+    { name: location.name },
+  ];
 
   return (
     <div className="px-[5vw] py-32">
       <JsonLd
         data={[
           placeJsonLd(location, photos.items.slice(0, 5).map((photo) => photo.imageUrl)),
-          breadcrumbJsonLd([
-            { name: "Início", path: "/" },
-            { name: "Locais", path: "/locations" },
-            { name: location.name, path: locationPath(location) },
-          ]),
+          breadcrumbJsonLd(crumbs.map((crumb) => ({ name: crumb.name, path: crumb.href ?? locationPath(location) }))),
         ]}
       />
       <BackButton />
+      <Breadcrumbs items={crumbs} />
 
       <span className="mb-2 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
-        {location.city}
+        {location.citySlug ? (
+          <Link href={cityPath({ slug: location.citySlug })} className="hover:underline">
+            {location.city}
+          </Link>
+        ) : (
+          location.city
+        )}
+        {location.category && ` · ${categoryLabel(location.category)}`}
       </span>
       <h1 className="mb-4 font-display text-4xl font-semibold">{location.name}</h1>
       <div className="flex items-center gap-2 font-mono text-sm text-cream-dim light:text-ink">
@@ -83,26 +113,13 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
         </svg>
       </div>
 
+      {location.description && (
+        <p className="mt-4 max-w-2xl whitespace-pre-line text-cream-dim light:text-ink-dim">{location.description}</p>
+      )}
+
       {sunset && (
-        <div className="mt-6 flex items-center gap-4 rounded-2xl border border-white/10 px-5 py-4 light:border-line light:bg-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--sun-core)" strokeWidth={2} className="h-8 w-8 shrink-0">
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 3v2M12 19v2M5 5l1.5 1.5M17.5 17.5 19 19M3 12h2M19 12h2M5 19l1.5-1.5M17.5 6.5 19 5" />
-          </svg>
-          <div>
-            <p className="font-display text-lg font-semibold">Hoje o sol se põe às {formatTime(sunset.sunset, sunset.tzId)}</p>
-            <p className="mt-1 font-mono text-xs text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
-              Horário disponibilizado por:{" "}
-              <a
-                href="https://sunrise-sunset.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:opacity-80"
-              >
-                sunrise-sunset.org
-              </a>
-            </p>
-          </div>
+        <div className="mt-6">
+          <SunsetTimeCard sunset={sunset} />
         </div>
       )}
 
@@ -127,6 +144,8 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
 
       <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Avaliações</h2>
       <LocationRatings locationId={id} initialPage={ratings} />
+
+      <NearbyLocations locations={nearby} />
     </div>
   );
 }

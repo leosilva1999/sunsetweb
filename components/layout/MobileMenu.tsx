@@ -62,6 +62,9 @@ export default function MobileMenu() {
           <Link href="/locations" onClick={() => setIsOpen(false)} className={linkClass}>
             Explorar
           </Link>
+          <Link href="/cidades" onClick={() => setIsOpen(false)} className={linkClass}>
+            Cidades
+          </Link>
           <Link href="/photos" onClick={() => setIsOpen(false)} className={linkClass}>
             Feed
           </Link>

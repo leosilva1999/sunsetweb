@@ -38,7 +38,9 @@ async function collectAll<T>(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [locations, photos] = await Promise.all([
+  const [cities, localities, locations, photos] = await Promise.all([
+    collectAll("cities", (cursor) => getSitemapEntries("city", cursor, PAGE_SIZE)),
+    collectAll("localities", (cursor) => getSitemapEntries("locality", cursor, PAGE_SIZE)),
     collectAll("locations", (cursor) => getSitemapEntries("location", cursor, PAGE_SIZE)),
     collectAll("photos", (cursor) => getSitemapEntries("photo", cursor, PAGE_SIZE)),
   ]);
@@ -47,9 +49,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: SITE_URL, changeFrequency: "daily", priority: 1 },
     { url: `${SITE_URL}/locations`, changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/ranking`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${SITE_URL}/cidades`, changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/photos`, changeFrequency: "daily", priority: 0.7 },
     { url: `${SITE_URL}/termos`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${SITE_URL}/privacidade`, changeFrequency: "yearly", priority: 0.2 },
+    // Municípios e localidades dividem o mesmo formato de endereço (/cidades/{slug}); a API só
+    // lista os que têm página (município com local; localidade com local que tem foto).
+    ...[...cities, ...localities].flatMap((city) =>
+      city.slug
+        ? [
+            {
+              url: `${SITE_URL}/cidades/${city.slug}`,
+              lastModified: city.lastModified,
+              changeFrequency: "weekly" as const,
+              priority: 0.8,
+            },
+          ]
+        : [],
+    ),
     ...locations.map((location) => ({
       // Slug é a URL canônica; o id só entra se a API não mandou slug.
       url: `${SITE_URL}/locations/${location.slug ?? location.id}`,
