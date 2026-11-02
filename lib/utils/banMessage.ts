@@ -17,7 +17,8 @@ export function getBanMessage(err: unknown): string | null {
   const until = firstFieldError(err.fieldErrors, "bannedUntil");
 
   let message = "Esta conta está suspensa.";
-  if (reason) message += ` Motivo: ${reason}`;
+  // O motivo é texto livre do moderador: só põe o ponto final se ele não veio com pontuação.
+  if (reason) message += ` Motivo: ${/[.!?…]$/.test(reason.trim()) ? reason.trim() : `${reason.trim()}.`}`;
   if (until && !Number.isNaN(new Date(until).getTime())) {
     message += ` A suspensão termina em ${formatDate(until)}.`;
   }
