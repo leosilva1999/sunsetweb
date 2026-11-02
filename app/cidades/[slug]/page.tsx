@@ -145,6 +145,11 @@ export default async function CityPage({ params }: PageProps<"/cidades/[slug]">)
       ) : (
         <CityLocations slug={city.slug} initialPage={locations} />
       )}
+      <p className="mt-6 text-sm">
+        <Link href={`/ranking?city=${city.slug}&period=all`} className="font-medium text-sun-mid hover:opacity-80 light:text-sun-deep">
+          Ver o ranking de {city.name}
+        </Link>
+      </p>
 
       {photos.items.length > 0 && (
         <>

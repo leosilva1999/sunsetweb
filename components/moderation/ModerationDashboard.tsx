@@ -8,16 +8,18 @@ import LegalDocumentEditor from "@/components/moderation/LegalDocumentEditor";
 import UserRoleManager from "@/components/moderation/UserRoleManager";
 import ModerationHistory from "@/components/moderation/ModerationHistory";
 import DeletedLocations from "@/components/moderation/DeletedLocations";
+import UnresolvedCities from "@/components/moderation/UnresolvedCities";
 import { useAuth, hasStoredAuth } from "@/lib/hooks/useAuth";
 
 const REPORTS_TAB = "Denúncias";
+const UNRESOLVED_CITIES_TAB = "Locais sem cidade";
 const HISTORY_TAB = "Histórico";
 const DELETED_LOCATIONS_TAB = "Locais excluídos";
 const TERMS_TAB = "Termos de Uso";
 const PRIVACY_TAB = "Política de Privacidade";
 const USERS_TAB = "Usuários";
-const MODERATOR_TABS = [REPORTS_TAB, DELETED_LOCATIONS_TAB, HISTORY_TAB];
-const ADMIN_TABS = [REPORTS_TAB, DELETED_LOCATIONS_TAB, HISTORY_TAB, TERMS_TAB, PRIVACY_TAB, USERS_TAB];
+const MODERATOR_TABS = [REPORTS_TAB, UNRESOLVED_CITIES_TAB, DELETED_LOCATIONS_TAB, HISTORY_TAB];
+const ADMIN_TABS = [REPORTS_TAB, UNRESOLVED_CITIES_TAB, DELETED_LOCATIONS_TAB, HISTORY_TAB, TERMS_TAB, PRIVACY_TAB, USERS_TAB];
 
 export default function ModerationDashboard() {
   const { user } = useAuth();
@@ -48,6 +50,7 @@ export default function ModerationDashboard() {
     <div>
       <Tabs options={visibleTabs} active={activeTab} onChange={setActiveTab} />
       {activeTab === REPORTS_TAB && <ReportsQueue />}
+      {activeTab === UNRESOLVED_CITIES_TAB && <UnresolvedCities />}
       {activeTab === DELETED_LOCATIONS_TAB && <DeletedLocations />}
       {activeTab === HISTORY_TAB && <ModerationHistory />}
       {isAdmin && activeTab === TERMS_TAB && <LegalDocumentEditor documentType="TermsOfService" />}

@@ -1,7 +1,8 @@
 import { apiFetch } from "@/lib/api/client";
 import type { Report, ReportTargetType, ReportReason, ReportStatus, ModerationAction } from "@/types/report";
 import type { User, UserRole } from "@/types/user";
-import type { Location, DeletedLocation } from "@/types/location";
+import type { Location, DeletedLocation, LocationCategory } from "@/types/location";
+import type { UnresolvedCityItem } from "@/types/city";
 import type { CursorPage } from "@/types/pagination";
 
 export function createReport(
@@ -115,4 +116,32 @@ export function getModerationActions(token: string, cursor?: string, limit?: num
   });
   const suffix = query.size > 0 ? `?${query}` : "";
   return apiFetch<CursorPage<ModerationAction>>(`/moderation/actions${suffix}`, { token });
+}
+
+// Fila de revisão: locais criados com cidade em texto que o sistema não casou com segurança.
+export function getUnresolvedCityLocations(token: string, limit?: number) {
+  const suffix = limit ? `?limit=${limit}` : "";
+  return apiFetch<UnresolvedCityItem[]>(`/moderation/locations/unresolved-city${suffix}`, { token });
+}
+
+// cityId pode ser município ou localidade (neste caso o município dela vira a cidade).
+export function updateLocationCity(locationId: string, cityId: string, token: string) {
+  return apiFetch<Location>(`/moderation/locations/${locationId}/city`, {
+    method: "PATCH",
+    body: JSON.stringify({ cityId }),
+    token,
+  });
+}
+
+// Parcial: o que ficar de fora não muda. description "" limpa a descrição.
+export function updateLocationDetails(
+  locationId: string,
+  details: { description?: string; category?: LocationCategory },
+  token: string,
+) {
+  return apiFetch<Location>(`/moderation/locations/${locationId}`, {
+    method: "PATCH",
+    body: JSON.stringify(details),
+    token,
+  });
 }

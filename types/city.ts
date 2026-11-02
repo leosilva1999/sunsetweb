@@ -1,3 +1,5 @@
+import type { Location } from "@/types/location";
+
 export type CityKind = "Municipality" | "Locality";
 
 // Município de uma localidade (null num município).
@@ -72,3 +74,17 @@ export interface SitemapEntry {
   lastModified: string;
 }
 
+
+// GET /moderation/locations/unresolved-city - fila de locais sem cidade do catálogo.
+// match = um município serve (confirmar suggestedCity); ambiguous = escolher entre candidates;
+// locality = só uma localidade tem o nome (confirmar muda a cidade exibida); none = buscar à mão.
+export type UnresolvedCityReason = "match" | "ambiguous" | "locality" | "none";
+
+export interface UnresolvedCityItem {
+  location: Location;
+  createdByUserId: string | null;
+  reason: UnresolvedCityReason;
+  suggestedCity: City | null;
+  suggestedLocality: City | null;
+  candidates: City[];
+}

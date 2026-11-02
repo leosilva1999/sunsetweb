@@ -4,9 +4,12 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { searchLocations } from "@/lib/api/locations";
+import { searchCities } from "@/lib/api/cities";
 import { ApiError } from "@/lib/api/client";
 import type { Location } from "@/types/location";
+import type { City } from "@/types/city";
 import { locationPath } from "@/lib/utils/locationPath";
+import { cityPath, cityPlaceLabel } from "@/lib/utils/cityPath";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -14,6 +17,8 @@ interface SearchBarProps {
 }
 
 const SUGGESTIONS_LIMIT = 5;
+const CITY_SUGGESTIONS_LIMIT = 3;
+const CITY_MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 300;
 const RATE_LIMIT_COOLDOWN_MS = 10_000;
 
@@ -24,6 +29,8 @@ export default function SearchBar({
   const router = useRouter();
   const [query, setQuery] = useState(defaultValue);
   const [suggestions, setSuggestions] = useState<Location[]>([]);
+  // Cidades e localidades que têm página (com locais), mostradas antes dos locais.
+  const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rateLimitedUntil, setRateLimitedUntil] = useState(0);
@@ -44,6 +51,7 @@ export default function SearchBar({
     setWasEmpty(isEmptyNow);
     if (isEmptyNow) {
       setSuggestions([]);
+      setCitySuggestions([]);
       setIsOpen(false);
     }
   }
@@ -64,13 +72,22 @@ export default function SearchBar({
     const timeoutId = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const page = await searchLocations({ q: trimmed, limit: SUGGESTIONS_LIMIT });
+        // Cidades são um extra: se só essa chamada falhar, os locais aparecem do mesmo jeito.
+        const [locationsResult, citiesResult] = await Promise.allSettled([
+          searchLocations({ q: trimmed, limit: SUGGESTIONS_LIMIT }),
+          trimmed.length >= CITY_MIN_QUERY_LENGTH
+            ? searchCities({ q: trimmed, kind: "any", sort: "population", limit: CITY_SUGGESTIONS_LIMIT })
+            : Promise.resolve(null),
+        ]);
         if (requestId === requestIdRef.current) {
-          setSuggestions(page.items);
-          setIsOpen(true);
+          if (locationsResult.status === "fulfilled") {
+            setSuggestions(locationsResult.value.items);
+            setCitySuggestions(citiesResult.status === "fulfilled" && citiesResult.value ? citiesResult.value.items : []);
+            setIsOpen(true);
+          }
         }
-      } catch (err) {
-        if (err instanceof ApiError && err.status === 429) {
+        const failure = [locationsResult, citiesResult].find((result) => result.status === "rejected");
+        if (failure?.status === "rejected" && failure.reason instanceof ApiError && failure.reason.status === 429) {
           setRateLimitedUntil(Date.now() + RATE_LIMIT_COOLDOWN_MS);
         }
       } finally {
@@ -129,6 +146,13 @@ export default function SearchBar({
     router.push(locationPath(location));
   };
 
+  const handleSelectCity = (city: City) => {
+    skipNextSearchRef.current = true;
+    setIsOpen(false);
+    setQuery(city.name);
+    router.push(cityPath(city));
+  };
+
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape") setIsOpen(false);
   };
@@ -172,10 +196,27 @@ export default function SearchBar({
             style={{ position: "fixed", top: dropdownRect.top, left: dropdownRect.left, width: dropdownRect.width }}
             className="z-50 overflow-hidden rounded-2xl bg-white shadow-[0_12px_40px_rgba(21,10,38,0.25)]"
           >
-            {suggestions.length === 0 ? (
+            {suggestions.length === 0 && citySuggestions.length === 0 ? (
               <p className="px-5 py-4 text-sm text-[#8a7d6f]">{isLoading ? "Buscando..." : "Nenhum local encontrado."}</p>
             ) : (
-              suggestions.map((location) => (
+              <>
+              {citySuggestions.map((city) => (
+                <button
+                  key={city.id}
+                  type="button"
+                  role="option"
+                  aria-selected={false}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => handleSelectCity(city)}
+                  className="flex w-full flex-col items-start gap-0.5 px-5 py-3 text-left hover:bg-black/5"
+                >
+                  <span className="font-medium text-ink">{city.name}</span>
+                  <span className="font-mono text-xs text-[#8a7d6f]">
+                    Cidade · {cityPlaceLabel(city)}
+                  </span>
+                </button>
+              ))}
+              {suggestions.map((location) => (
                 <button
                   key={location.id}
                   type="button"
@@ -188,7 +229,8 @@ export default function SearchBar({
                   <span className="font-medium text-ink">{location.name}</span>
                   <span className="font-mono text-xs text-[#8a7d6f]">{location.city}</span>
                 </button>
-              ))
+              ))}
+              </>
             )}
           </div>,
           document.body,

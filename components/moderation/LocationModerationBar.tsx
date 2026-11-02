@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import EditCoordinatesDialog from "@/components/moderation/EditCoordinatesDialog";
 import MergeLocationDialog from "@/components/moderation/MergeLocationDialog";
+import EditLocationDetailsDialog from "@/components/moderation/EditLocationDetailsDialog";
+import type { LocationCategory } from "@/types/location";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { deleteLocation } from "@/lib/api/moderation";
 import { ApiError } from "@/lib/api/client";
@@ -14,6 +16,8 @@ interface LocationModerationBarProps {
   name: string;
   latitude: number;
   longitude: number;
+  description: string | null;
+  category: LocationCategory | null;
 }
 
 const buttonClass =
@@ -21,10 +25,18 @@ const buttonClass =
 
 // A página do local é renderizada no servidor, então o papel é checado aqui no cliente. É só
 // conveniência: quem não é moderador nem admin recebe 403 da API de qualquer jeito.
-export default function LocationModerationBar({ locationId, name, latitude, longitude }: LocationModerationBarProps) {
+export default function LocationModerationBar({
+  locationId,
+  name,
+  latitude,
+  longitude,
+  description,
+  category,
+}: LocationModerationBarProps) {
   const { user, getAccessToken } = useAuth();
   const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isMergeOpen, setIsMergeOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -60,6 +72,9 @@ export default function LocationModerationBar({ locationId, name, latitude, long
         <button type="button" onClick={() => setIsEditOpen(true)} className={buttonClass}>
           Editar localização
         </button>
+        <button type="button" onClick={() => setIsDetailsOpen(true)} className={buttonClass}>
+          Editar descrição e tipo
+        </button>
         <button type="button" onClick={() => setIsMergeOpen(true)} className={buttonClass}>
           Mesclar em…
         </button>
@@ -84,6 +99,18 @@ export default function LocationModerationBar({ locationId, name, latitude, long
           router.refresh();
         }}
         onCancel={() => setIsEditOpen(false)}
+      />
+      <EditLocationDetailsDialog
+        open={isDetailsOpen}
+        locationId={locationId}
+        locationName={name}
+        description={description}
+        category={category}
+        onSaved={() => {
+          setIsDetailsOpen(false);
+          router.refresh();
+        }}
+        onCancel={() => setIsDetailsOpen(false)}
       />
       <MergeLocationDialog
         open={isMergeOpen}

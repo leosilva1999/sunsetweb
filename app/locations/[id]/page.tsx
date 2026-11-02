@@ -133,6 +133,8 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
         name={location.name}
         latitude={location.latitude}
         longitude={location.longitude}
+        description={location.description}
+        category={location.category}
       />
 
       <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Fotos do local</h2>

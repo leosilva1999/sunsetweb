@@ -1,6 +1,9 @@
 import SearchBar from "@/components/location/SearchBar";
 import NearbyButton from "@/components/location/NearbyButton";
 import RankingList from "@/components/location/RankingList";
+import CityCard from "@/components/city/CityCard";
+import Link from "next/link";
+import { searchCities } from "@/lib/api/cities";
 import GalleryTabs from "@/components/photo/GalleryTabs";
 import UploadCtaButton from "@/components/photo/UploadCtaButton";
 import { getLocationRanking } from "@/lib/api/locations";
@@ -18,8 +21,9 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [ranking, photosPage, photoCount] = await Promise.all([
+  const [ranking, cities, photosPage, photoCount] = await Promise.all([
     getLocationRanking("week", 4).catch(() => []),
+    searchCities({ kind: "municipality", sort: "locations", limit: 4 }).then((page) => page.items, () => []),
     getPhotos("recent", undefined, 5).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
     getPhotoCount().catch(() => null),
   ]);
@@ -80,7 +84,30 @@ export default async function HomePage() {
         )}
       </section>
 
-      <section id="gallery" className="bg-dusk-950 px-[5vw] py-24 light:bg-paper">
+      {cities.length > 0 && (
+        <section id="cities" className="bg-dusk-950 px-[5vw] py-24 light:bg-paper">
+          <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <span className="mb-2.5 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
+                Destinos
+              </span>
+              <h2 className="font-display text-[clamp(1.9rem,3.4vw,2.8rem)] font-semibold tracking-[-0.01em]">
+                Cidades com mais locais
+              </h2>
+            </div>
+            <Link href="/cidades" className="text-sm font-medium text-sun-mid hover:opacity-80 light:text-sun-deep">
+              Ver todas as cidades
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {cities.map((city) => (
+              <CityCard key={city.id} city={city} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section id="gallery" className="bg-dusk-900 px-[5vw] py-24 light:bg-paper-dim">
         <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
           <div>
             <span className="mb-2.5 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
