@@ -24,6 +24,7 @@ interface NewLocationModalProps {
 const DUPLICATE_RADIUS_KM = 0.5;
 const DEBOUNCE_MS = 400;
 const DESCRIPTION_MAX_LENGTH = 1000;
+const CITY_REQUIRED_MESSAGE = "Escolha a cidade do local.";
 
 const FIELD_CLASS =
   "rounded-2xl border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40";
@@ -135,7 +136,10 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
           setCityFarAway(result.chosenCity?.farAway ? Math.round(result.chosenCity.distanceKm) : null);
         } else {
           setCityFarAway(null);
-          if (result.items[0]) setCity(result.items[0]);
+          if (result.items[0]) {
+            setCity(result.items[0]);
+            setError((current) => (current === CITY_REQUIRED_MESSAGE ? null : current));
+          }
         }
       } catch {
         // Sem sugestão a pessoa ainda pode buscar a cidade à mão.
@@ -152,6 +156,7 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
 
   const handleCitySelect = (selected: CityOption) => {
     setCity(selected);
+    setError((current) => (current === CITY_REQUIRED_MESSAGE ? null : current));
     setCityChosenByUser(true);
     setCityFarAway(null);
   };
@@ -174,12 +179,15 @@ export default function NewLocationModal({ open, initialName, onCreated, onSelec
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    // O modal é um portal: no React o submit sobe pela árvore de componentes até o <form> do
+    // upload (que está acima do LocationPicker) e dispararia o envio da foto junto.
+    event.stopPropagation();
     if (!position) {
       setError("Posicione o local no mapa.");
       return;
     }
     if (!city) {
-      setError("Escolha a cidade do local.");
+      setError(CITY_REQUIRED_MESSAGE);
       return;
     }
     if (hasPendingDuplicates) return;
