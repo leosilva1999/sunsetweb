@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getLocation, getLocationPhotos, getLocationRatings, getLocationSunset } from "@/lib/api/locations";
 import { formatTime } from "@/lib/utils/formatDate";
 import BackButton from "@/components/ui/BackButton";
@@ -11,21 +11,21 @@ import LocationModerationBar from "@/components/moderation/LocationModerationBar
 import JsonLd from "@/components/seo/JsonLd";
 import { buildPageMetadata } from "@/lib/utils/shareMetadata";
 import { breadcrumbJsonLd, placeJsonLd } from "@/lib/utils/structuredData";
+import { locationPath } from "@/lib/utils/locationPath";
 
 export async function generateMetadata({ params }: PageProps<"/locations/[id]">): Promise<Metadata> {
-  const { id } = await params;
+  // O segmento da URL é o slug (ou o GUID, de links antigos: a página redireciona pro slug).
+  const { id: idOrSlug } = await params;
   try {
-    // Mesma chamada que a página faz (getLocationPhotos(id)), então o Next reaproveita a
-    // resposta em vez de ir à API duas vezes.
-    const [location, photos] = await Promise.all([
-      getLocation(id),
-      getLocationPhotos(id).catch(() => null),
-    ]);
+    // Mesmas chamadas que a página faz, então o Next reaproveita as respostas em vez de ir
+    // à API duas vezes.
+    const location = await getLocation(idOrSlug);
+    const photos = await getLocationPhotos(location.id).catch(() => null);
     const rating = location.avgRating > 0 ? ` Nota média ${location.avgRating.toFixed(1)} de 5.` : "";
     return buildPageMetadata({
       title: `Pôr do sol em ${location.name}, ${location.city}`,
       description: `Veja fotos e avaliações do pôr do sol em ${location.name}, ${location.city}.${rating}`,
-      path: `/locations/${id}`,
+      path: locationPath(location),
       // Prévia com uma foto do próprio local; sem fotos, cai no logo.
       image: photos?.items[0]?.imageUrl,
     });
@@ -35,20 +35,28 @@ export async function generateMetadata({ params }: PageProps<"/locations/[id]">)
 }
 
 export default async function LocationDetailPage({ params }: PageProps<"/locations/[id]">) {
-  const { id } = await params;
+  const { id: idOrSlug } = await params;
 
-  const [location, photos, ratings, sunset] = await Promise.all([
-    getLocation(id).catch(() => null),
+  const location = await getLocation(idOrSlug).catch(() => null);
+  if (!location) {
+    notFound();
+  }
+
+  // Um endereço só por local: o GUID (links e buscas antigos) e variações de caixa do slug
+  // vão pro slug canônico com redirect permanente, pra o Google juntar tudo numa URL.
+  if (idOrSlug !== location.slug) {
+    permanentRedirect(locationPath(location));
+  }
+
+  // As demais rotas do local são por id.
+  const id = location.id;
+  const [photos, ratings, sunset] = await Promise.all([
     getLocationPhotos(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
     getLocationRatings(id).catch(() => ({ items: [], nextCursor: null, hasMore: false })),
     // sunrise-sunset.org é um serviço externo — indisponibilidade dele não pode
     // derrubar a página do local, só omitir esse bloco.
     getLocationSunset(id).catch(() => null),
   ]);
-
-  if (!location) {
-    notFound();
-  }
 
   return (
     <div className="px-[5vw] py-32">
@@ -58,7 +66,7 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
           breadcrumbJsonLd([
             { name: "Início", path: "/" },
             { name: "Locais", path: "/locations" },
-            { name: location.name, path: `/locations/${id}` },
+            { name: location.name, path: locationPath(location) },
           ]),
         ]}
       />

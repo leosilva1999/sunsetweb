@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Location } from "@/types/location";
+import { locationPath } from "@/lib/utils/locationPath";
 import { formatCoordinates } from "@/lib/utils/geolocation";
 
 const THUMB_GRADIENTS = [
@@ -19,7 +20,7 @@ export default function RankingList({ locations }: RankingListProps) {
       {locations.map((location, index) => (
         <Link
           key={location.id}
-          href={`/locations/${location.id}`}
+          href={locationPath(location)}
           className="grid grid-cols-[56px_90px_1fr_auto] items-center gap-6 rounded-2xl p-4.5 transition-colors hover:bg-white/4 max-md:grid-cols-[40px_70px_1fr] light:bg-card light:shadow-[0_2px_10px_rgba(74,43,99,0.05)] light:hover:bg-card light:hover:shadow-[0_8px_24px_rgba(74,43,99,0.1)]"
         >
           <span

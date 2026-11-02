@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPhoto, getPhotoComments } from "@/lib/api/photos";
 import { getLocation } from "@/lib/api/locations";
@@ -13,6 +14,7 @@ import { SITE_URL } from "@/lib/utils/siteUrl";
 import { buildPageMetadata } from "@/lib/utils/shareMetadata";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbJsonLd, photoJsonLd } from "@/lib/utils/structuredData";
+import { locationPath } from "@/lib/utils/locationPath";
 
 export async function generateMetadata({ params }: PageProps<"/photos/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -49,7 +51,7 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
           photoJsonLd(photo),
           breadcrumbJsonLd([
             { name: "Início", path: "/" },
-            { name: photo.locationName, path: `/locations/${photo.locationId}` },
+            { name: photo.locationName, path: location ? locationPath(location) : `/locations/${photo.locationId}` },
             { name: "Foto", path: `/photos/${photo.id}` },
           ]),
         ]}
@@ -76,7 +78,11 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
               <span className="mb-1 block font-mono text-xs tracking-[0.14em] text-sun-mid uppercase light:text-sun-deep">
                 {location.city}
               </span>
-              <h1 className="mb-2 font-display text-2xl font-semibold">{location.name}</h1>
+              <h1 className="mb-2 font-display text-2xl font-semibold">
+                <Link href={locationPath(location)} className="hover:underline">
+                  {location.name}
+                </Link>
+              </h1>
             </>
           )}
           {photo.caption && <p className="mb-4 text-cream-dim light:text-ink-dim">{photo.caption}</p>}

@@ -86,5 +86,6 @@ export function getGeoCities(lat: number, lng: number, options: { limit?: number
 
 // Tudo que tem página pública, enxuto, pro sitemap. Siga nextCursor até hasMore ser false.
 export function getSitemapEntries(type: SitemapEntryType, cursor?: string, limit = 1000) {
-  return apiFetch<CursorPage<SitemapEntry>>(`/sitemap/entries${toQuery({ type, cursor, limit })}`);
+  const tag = type === "location" ? "locations" : type === "photo" ? "photos" : "cities";
+  return apiFetch<CursorPage<SitemapEntry>>(`/sitemap/entries${toQuery({ type, cursor, limit })}`, tagged(tag));
 }

@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-import { searchLocations } from "@/lib/api/locations";
-import { getPhotos } from "@/lib/api/photos";
+import { getSitemapEntries } from "@/lib/api/cities";
 import { SITE_URL } from "@/lib/utils/siteUrl";
 import { logger } from "@/lib/utils/logger";
 import type { CursorPage } from "@/types/pagination";
@@ -9,11 +8,12 @@ import type { CursorPage } from "@/types/pagination";
 // locais/fotos novos.
 export const revalidate = 3600;
 
-// A API limita cada página a 50 itens e GET /locations tem rate limit (40 req/10s por
-// IP) — o teto de páginas mantém o sitemap dentro disso. Passando dele, o sitemap
-// fica truncado (o aviso no log deixa isso visível).
-const PAGE_SIZE = 50;
-const MAX_PAGES = 20;
+// GET /sitemap/entries devolve até 1000 itens por página, sem rate limit de busca. O teto de
+// páginas é só uma trava contra loop; passando dele o sitemap fica truncado (o aviso no log
+// deixa isso visível). Um arquivo de sitemap comporta no máximo 50 mil URLs: se o total chegar
+// perto disso, é hora de dividir com generateSitemaps.
+const PAGE_SIZE = 1000;
+const MAX_PAGES = 25;
 
 async function collectAll<T>(
   label: string,
@@ -39,8 +39,8 @@ async function collectAll<T>(
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [locations, photos] = await Promise.all([
-    collectAll("locations", (cursor) => searchLocations({ cursor, limit: PAGE_SIZE })),
-    collectAll("photos", (cursor) => getPhotos("recent", cursor, PAGE_SIZE)),
+    collectAll("locations", (cursor) => getSitemapEntries("location", cursor, PAGE_SIZE)),
+    collectAll("photos", (cursor) => getSitemapEntries("photo", cursor, PAGE_SIZE)),
   ]);
 
   return [
@@ -51,14 +51,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/termos`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${SITE_URL}/privacidade`, changeFrequency: "yearly", priority: 0.2 },
     ...locations.map((location) => ({
-      url: `${SITE_URL}/locations/${location.id}`,
-      lastModified: location.createdAt,
+      // Slug é a URL canônica; o id só entra se a API não mandou slug.
+      url: `${SITE_URL}/locations/${location.slug ?? location.id}`,
+      lastModified: location.lastModified,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
     ...photos.map((photo) => ({
       url: `${SITE_URL}/photos/${photo.id}`,
-      lastModified: photo.createdAt,
+      lastModified: photo.lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.5,
     })),

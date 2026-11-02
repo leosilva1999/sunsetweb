@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { locationPath } from "@/lib/utils/locationPath";
 import { formatDistance } from "@/lib/utils/geolocation";
 import type { Location } from "@/types/location";
 
@@ -9,7 +10,7 @@ interface LocationCardProps {
 export default function LocationCard({ location }: LocationCardProps) {
   return (
     <Link
-      href={`/locations/${location.id}`}
+      href={locationPath(location)}
       className="block rounded-2xl border border-white/10 p-5 transition-colors hover:border-white/30 light:border-line light:bg-card light:shadow-[0_2px_10px_rgba(74,43,99,0.05)] light:hover:border-line"
     >
       <h3 className="font-display text-lg font-medium">{location.name}</h3>

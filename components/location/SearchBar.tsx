@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { searchLocations } from "@/lib/api/locations";
 import { ApiError } from "@/lib/api/client";
 import type { Location } from "@/types/location";
+import { locationPath } from "@/lib/utils/locationPath";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -125,7 +126,7 @@ export default function SearchBar({
     skipNextSearchRef.current = true;
     setIsOpen(false);
     setQuery(location.name);
-    router.push(`/locations/${location.id}`);
+    router.push(locationPath(location));
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {

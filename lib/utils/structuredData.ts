@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/utils/siteUrl";
+import { locationPath } from "@/lib/utils/locationPath";
 import type { Location } from "@/types/location";
 import type { Photo } from "@/types/photo";
 
@@ -38,12 +39,12 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   };
 }
 
-export function placeJsonLd(location: Pick<Location, "id" | "name" | "city" | "latitude" | "longitude">, images: string[] = []) {
+export function placeJsonLd(location: Pick<Location, "slug" | "name" | "city" | "latitude" | "longitude">, images: string[] = []) {
   return {
     "@context": CONTEXT,
     "@type": "Place",
     name: location.name,
-    url: url(`/locations/${location.id}`),
+    url: url(locationPath(location)),
     address: { "@type": "PostalAddress", addressLocality: location.city },
     geo: { "@type": "GeoCoordinates", latitude: location.latitude, longitude: location.longitude },
     ...(images.length > 0 ? { image: images } : {}),
