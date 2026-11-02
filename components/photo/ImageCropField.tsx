@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
 import { getCroppedImageBlob } from "@/lib/utils/imageCrop";
 
 interface ImageCropFieldProps {
   onImageReady: (blob: Blob | null) => void;
+  /** Avisa quando há uma imagem escolhida cujo corte ainda não foi confirmado ("Aplicar corte"). */
+  onPendingChange?: (isPending: boolean) => void;
   /** URL já existente pra mostrar como preview inicial (ex.: avatar atual) antes de qualquer troca. */
   initialPreviewUrl?: string | null;
   aspect?: number;
@@ -20,6 +22,7 @@ const JPEG_QUALITY = 0.85;
 
 export default function ImageCropField({
   onImageReady,
+  onPendingChange,
   initialPreviewUrl,
   aspect = DEFAULT_ASPECT_RATIO,
   cropShape = "rect",
@@ -38,6 +41,11 @@ export default function ImageCropField({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isPending = imageSrc !== null;
+
+  useEffect(() => {
+    onPendingChange?.(isPending);
+  }, [isPending, onPendingChange]);
 
   const resetSelection = () => {
     setImageSrc(null);

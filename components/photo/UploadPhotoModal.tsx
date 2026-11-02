@@ -11,6 +11,8 @@ import { createPhoto, createPhotoUploadUrl } from "@/lib/api/photos";
 import { uploadBlob } from "@/lib/api/storage";
 import type { Location } from "@/types/location";
 
+const CROP_PENDING_ERROR_PREFIX = "Confirme o corte da foto";
+
 export default function UploadPhotoModal() {
   const { isOpen, close } = useUploadModal();
   const router = useRouter();
@@ -18,6 +20,7 @@ export default function UploadPhotoModal() {
   const [caption, setCaption] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [isCropPending, setIsCropPending] = useState(false);
   const [isNewLocationModalOpen, setIsNewLocationModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStage, setSubmitStage] = useState<"image" | "photo" | null>(null);
@@ -33,6 +36,7 @@ export default function UploadPhotoModal() {
       setCaption("");
       setSelectedLocation(null);
       setImageBlob(null);
+      setIsCropPending(false);
       setIsNewLocationModalOpen(false);
       setError(null);
     }
@@ -52,9 +56,19 @@ export default function UploadPhotoModal() {
 
   if (!isOpen) return null;
 
+  // O aviso de "confirme o corte" some assim que o corte é confirmado ou descartado.
+  const handleCropPendingChange = (isPending: boolean) => {
+    setIsCropPending(isPending);
+    if (!isPending) setError((current) => (current?.startsWith(CROP_PENDING_ERROR_PREFIX) ? null : current));
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
+    if (isCropPending) {
+      setError(`${CROP_PENDING_ERROR_PREFIX} em “Aplicar corte” antes de publicar.`);
+      return;
+    }
     if (!selectedLocation) {
       setError("Escolha o local da foto.");
       return;
@@ -103,7 +117,7 @@ export default function UploadPhotoModal() {
           Postar foto
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <ImageCropField onImageReady={setImageBlob} />
+          <ImageCropField onImageReady={setImageBlob} onPendingChange={handleCropPendingChange} />
 
           <LocationPicker
             value={selectedLocation}
@@ -120,7 +134,12 @@ export default function UploadPhotoModal() {
             className="resize-none rounded-2xl border border-white/15 bg-transparent px-5 py-3 text-sm text-cream placeholder:text-cream-dim focus:border-white/40 focus:outline-none light:border-ink/15 light:text-ink light:placeholder:text-ink-dim light:focus:border-ink/40"
           />
           {error && <p className="text-sm text-sun-deep">{error}</p>}
-          <div className="flex justify-end gap-3">
+          <div className="flex items-center justify-end gap-3">
+            {isCropPending && (
+              <span className="mr-auto text-xs text-cream-dim light:text-ink-dim">
+                Confirme o corte para publicar.
+              </span>
+            )}
             <button
               type="button"
               onClick={close}
@@ -128,7 +147,7 @@ export default function UploadPhotoModal() {
             >
               Cancelar
             </button>
-            <Button type="submit" variant="accent" disabled={isSubmitting}>
+            <Button type="submit" variant="accent" disabled={isSubmitting || isCropPending}>
               {submitStage === "image" ? "Enviando foto..." : submitStage === "photo" ? "Publicando..." : "Publicar"}
             </Button>
           </div>

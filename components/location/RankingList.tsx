@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { Location } from "@/types/location";
 import { locationPath } from "@/lib/utils/locationPath";
+import PhotoImage from "@/components/photo/PhotoImage";
 import { formatCoordinates } from "@/lib/utils/geolocation";
+import { pluralize } from "@/lib/utils/pluralize";
 
 const THUMB_GRADIENTS = [
   "linear-gradient(135deg,#ff8c5a,#e85d8a)",
@@ -29,13 +31,20 @@ export default function RankingList({ locations }: RankingListProps) {
             {String(index + 1).padStart(2, "0")}
           </span>
           <div
-            className="h-16 w-[90px] rounded-[10px] bg-cover bg-center"
+            className="relative h-16 w-[90px] overflow-hidden rounded-[10px] bg-cover bg-center"
             style={{ backgroundImage: THUMB_GRADIENTS[index % THUMB_GRADIENTS.length] }}
-          />
+          >
+            {location.coverImageUrl && (
+              <PhotoImage src={location.coverImageUrl} alt={`Pôr do sol em ${location.name}`} sizes="90px" />
+            )}
+          </div>
           <div>
             <h3 className="mb-1 font-display text-[1.15rem] font-medium">{location.name}</h3>
-            <span className="font-mono text-[0.76rem] text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
+            <span className="block font-mono text-[0.76rem] text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
               {formatCoordinates({ lat: location.latitude, lng: location.longitude })} · {location.city}
+            </span>
+            <span className="mt-1 block font-mono text-[0.76rem] text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
+              {pluralize(location.ratingsCount, "avaliação", "avaliações")} · {pluralize(location.photosCount, "foto", "fotos")}
             </span>
           </div>
           <div className="flex items-center gap-2 font-mono text-sm text-cream-dim max-md:hidden light:text-ink">

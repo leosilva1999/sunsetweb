@@ -9,6 +9,8 @@ import { createAvatarUploadUrl } from "@/lib/api/auth";
 import { uploadBlob } from "@/lib/api/storage";
 import type { User, PublicUser } from "@/types/user";
 
+const CROP_PENDING_ERROR_PREFIX = "Confirme o corte da foto";
+
 interface EditProfileModalProps {
   open: boolean;
   user: PublicUser;
@@ -26,6 +28,7 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
   const [bio, setBio] = useState(user.bio ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCropPending, setIsCropPending] = useState(false);
   const [wasOpen, setWasOpen] = useState(open);
 
   // Reajusta o estado durante a renderização (não num efeito) ao abrir o modal —
@@ -36,6 +39,7 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
     if (open) {
       setName(user.name);
       setAvatarBlob(undefined);
+      setIsCropPending(false);
       setBio(user.bio ?? "");
       setError(null);
     }
@@ -52,8 +56,18 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
 
   if (!open) return null;
 
+  // O aviso de "confirme o corte" some assim que o corte é confirmado ou descartado.
+  const handleCropPendingChange = (isPending: boolean) => {
+    setIsCropPending(isPending);
+    if (!isPending) setError((current) => (current?.startsWith(CROP_PENDING_ERROR_PREFIX) ? null : current));
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (isCropPending) {
+      setError(`${CROP_PENDING_ERROR_PREFIX} em “Aplicar corte” antes de salvar.`);
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
@@ -115,6 +129,7 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
             </span>
             <ImageCropField
               onImageReady={setAvatarBlob}
+              onPendingChange={handleCropPendingChange}
               initialPreviewUrl={user.avatarUrl}
               aspect={1}
               cropShape="round"
@@ -134,7 +149,12 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
             </span>
           </div>
           {error && <p className="text-sm text-sun-deep">{error}</p>}
-          <div className="mt-2 flex justify-end gap-3">
+          <div className="mt-2 flex items-center justify-end gap-3">
+            {isCropPending && (
+              <span className="mr-auto text-xs text-cream-dim light:text-ink-dim">
+                Confirme o corte para salvar.
+              </span>
+            )}
             <button
               type="button"
               onClick={onCancel}
@@ -142,7 +162,7 @@ export default function EditProfileModal({ open, user, onSaved, onCancel }: Edit
             >
               Cancelar
             </button>
-            <Button type="submit" variant="accent" disabled={isSaving}>
+            <Button type="submit" variant="accent" disabled={isSaving || isCropPending}>
               {isSaving ? "Salvando..." : "Salvar"}
             </Button>
           </div>
