@@ -15,6 +15,12 @@ export default function Footer() {
         </div>
       </div>
       <div className="flex items-center gap-5">
+        <Link href="/sobre" className="hover:opacity-100">
+          Sobre
+        </Link>
+        <Link href="/contato" className="hover:opacity-100">
+          Contato
+        </Link>
         <Link href="/privacidade" className="hover:opacity-100">
           Privacidade
         </Link>

@@ -51,6 +51,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/ranking`, changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/cidades`, changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/photos`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${SITE_URL}/sobre`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${SITE_URL}/contato`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/termos`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${SITE_URL}/privacidade`, changeFrequency: "yearly", priority: 0.2 },
     // Municípios e localidades dividem o mesmo formato de endereço (/cidades/{slug}); a API só
