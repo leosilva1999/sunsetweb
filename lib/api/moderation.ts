@@ -4,6 +4,7 @@ import type { User, UserRole } from "@/types/user";
 import type { Location, DeletedLocation, LocationCategory } from "@/types/location";
 import type { UnresolvedCityItem } from "@/types/city";
 import type { CursorPage } from "@/types/pagination";
+import type { GrowthGranularity, GrowthStats } from "@/types/stats";
 
 export function createReport(
   targetType: ReportTargetType,
@@ -47,21 +48,9 @@ export function searchUsers(token: string, q?: string, cursor?: string, limit?: 
   return apiFetch<CursorPage<User>>(`/moderation/users${suffix}`, { token });
 }
 
-const USERS_PAGE_SIZE = 50;
-
-// Não existe endpoint de estatísticas de usuários: o total e a curva de crescimento saem de
-// percorrer GET /moderation/users (mais novos primeiro, limit máx. 50). `truncated` avisa que
-// o teto de páginas foi atingido e que os números são parciais.
-export async function getAllUsers(token: string, maxPages = 100) {
-  const users: User[] = [];
-  let cursor: string | undefined;
-  for (let page = 0; page < maxPages; page++) {
-    const result = await searchUsers(token, undefined, cursor, USERS_PAGE_SIZE);
-    users.push(...result.items);
-    if (!result.hasMore || !result.nextCursor) return { users, truncated: false };
-    cursor = result.nextCursor;
-  }
-  return { users, truncated: true };
+// Sem from/to: a API usa os padrões da granularidade (30 dias, 12 semanas ou 12 meses).
+export function getGrowthStats(granularity: GrowthGranularity, token: string) {
+  return apiFetch<GrowthStats>(`/moderation/stats/growth?granularity=${granularity}`, { token });
 }
 
 export function changeUserRole(userId: string, role: UserRole, token: string) {

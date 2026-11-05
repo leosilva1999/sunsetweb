@@ -9,7 +9,7 @@ import UserRoleManager from "@/components/moderation/UserRoleManager";
 import ModerationHistory from "@/components/moderation/ModerationHistory";
 import DeletedLocations from "@/components/moderation/DeletedLocations";
 import UnresolvedCities from "@/components/moderation/UnresolvedCities";
-import UserGrowth from "@/components/moderation/UserGrowth";
+import GrowthDashboard from "@/components/moderation/GrowthDashboard";
 import { useAuth, hasStoredAuth } from "@/lib/hooks/useAuth";
 
 const REPORTS_TAB = "Denúncias";
@@ -58,7 +58,7 @@ export default function ModerationDashboard() {
       {isAdmin && activeTab === TERMS_TAB && <LegalDocumentEditor documentType="TermsOfService" />}
       {isAdmin && activeTab === PRIVACY_TAB && <LegalDocumentEditor documentType="PrivacyPolicy" />}
       {isAdmin && activeTab === USERS_TAB && <UserRoleManager />}
-      {isAdmin && activeTab === GROWTH_TAB && <UserGrowth onSeeMore={() => setActiveTab(USERS_TAB)} />}
+      {isAdmin && activeTab === GROWTH_TAB && <GrowthDashboard onSeeMore={() => setActiveTab(USERS_TAB)} />}
     </div>
   );
 }
