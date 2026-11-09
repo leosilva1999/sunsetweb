@@ -59,6 +59,9 @@ export const metadata: Metadata = {
     // Resolvido contra o metadataBase acima.
     images: ["/images/logo-vertical.png"],
   },
+  // Verificação do site no AdSense: fica no HTML inicial, independente do consentimento de
+  // cookies (o script de anúncios, esse sim, só carrega após o aceite).
+  other: { "google-adsense-account": "ca-pub-5290668497576981" },
 };
 
 const THEME_INIT_SCRIPT = `

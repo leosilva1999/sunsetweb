@@ -1,5 +1,6 @@
 import SearchBar from "@/components/location/SearchBar";
 import NearbyButton from "@/components/location/NearbyButton";
+import InFeedAd from "@/components/ads/InFeedAd";
 import RankingList from "@/components/location/RankingList";
 import CityCard from "@/components/city/CityCard";
 import Link from "next/link";
@@ -103,6 +104,11 @@ export default async function HomePage() {
             {cities.map((city) => (
               <CityCard key={city.id} city={city} />
             ))}
+            {/* Linha própria: com 4 cidades em 4 colunas, um quinto card ficaria sozinho. Sem
+                anúncio (sem consentimento/variáveis) o wrapper fica vazio e não ocupa espaço. */}
+            <div className="col-span-full empty:hidden">
+              <InFeedAd />
+            </div>
           </div>
         </section>
       )}
