@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import Link from "next/link";
+import InFeedAd from "@/components/ads/InFeedAd";
 import type { Location } from "@/types/location";
 import { locationPath } from "@/lib/utils/locationPath";
 import PhotoImage from "@/components/photo/PhotoImage";
@@ -12,48 +14,58 @@ const THUMB_GRADIENTS = [
   "linear-gradient(135deg,#2d1b4e,#ff8c5a)",
 ];
 
+// Anúncio depois do 5º item e a cada 10 a partir daí, nunca depois do último.
+const isAdPosition = (position: number, total: number) => position < total && position % 10 === 5;
+
 interface RankingListProps {
   locations: Location[];
+  showAds?: boolean;
 }
 
-export default function RankingList({ locations }: RankingListProps) {
+export default function RankingList({ locations, showAds = false }: RankingListProps) {
   return (
     <div className="flex flex-col gap-0.5 light:gap-2.5">
       {locations.map((location, index) => (
-        <Link
-          key={location.id}
-          href={locationPath(location)}
-          className="grid grid-cols-[56px_90px_1fr_auto] items-center gap-6 rounded-2xl p-4.5 transition-colors hover:bg-white/4 max-md:grid-cols-[40px_70px_1fr] light:bg-card light:shadow-[0_2px_10px_rgba(74,43,99,0.05)] light:hover:bg-card light:hover:shadow-[0_8px_24px_rgba(74,43,99,0.1)]"
-        >
-          <span
-            className={`font-mono text-[1.3rem] ${index === 0 ? "text-sun-core text-[1.6rem] light:text-sun-deep" : "text-sun-mid opacity-80"}`}
+        <Fragment key={location.id}>
+          <Link
+            href={locationPath(location)}
+            className="grid grid-cols-[56px_90px_1fr_auto] items-center gap-6 rounded-2xl p-4.5 transition-colors hover:bg-white/4 max-md:grid-cols-[40px_70px_1fr] light:bg-card light:shadow-[0_2px_10px_rgba(74,43,99,0.05)] light:hover:bg-card light:hover:shadow-[0_8px_24px_rgba(74,43,99,0.1)]"
           >
-            {String(index + 1).padStart(2, "0")}
-          </span>
-          <div
-            className="relative h-16 w-[90px] overflow-hidden rounded-[10px] bg-cover bg-center"
-            style={{ backgroundImage: THUMB_GRADIENTS[index % THUMB_GRADIENTS.length] }}
-          >
-            {location.coverImageUrl && (
-              <PhotoImage src={location.coverImageUrl} alt={`Pôr do sol em ${location.name}`} sizes="90px" />
-            )}
-          </div>
-          <div>
-            <h3 className="mb-1 font-display text-[1.15rem] font-medium">{location.name}</h3>
-            <span className="block font-mono text-[0.76rem] text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
-              {formatCoordinates({ lat: location.latitude, lng: location.longitude })} · {location.city}
+            <span
+              className={`font-mono text-[1.3rem] ${index === 0 ? "text-sun-core text-[1.6rem] light:text-sun-deep" : "text-sun-mid opacity-80"}`}
+            >
+              {String(index + 1).padStart(2, "0")}
             </span>
-            <span className="mt-1 block font-mono text-[0.76rem] text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
-              {pluralize(location.ratingsCount, "avaliação", "avaliações")} · {pluralize(location.photosCount, "foto", "fotos")}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 font-mono text-sm text-cream-dim max-md:hidden light:text-ink">
-            {location.avgRating.toFixed(1)}
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--sun-core)" strokeWidth={2} className="h-4 w-4">
-              <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
-            </svg>
-          </div>
-        </Link>
+            <div
+              className="relative h-16 w-[90px] overflow-hidden rounded-[10px] bg-cover bg-center"
+              style={{ backgroundImage: THUMB_GRADIENTS[index % THUMB_GRADIENTS.length] }}
+            >
+              {location.coverImageUrl && (
+                <PhotoImage src={location.coverImageUrl} alt={`Pôr do sol em ${location.name}`} sizes="90px" />
+              )}
+            </div>
+            <div>
+              <h3 className="mb-1 font-display text-[1.15rem] font-medium">{location.name}</h3>
+              <span className="block font-mono text-[0.76rem] text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
+                {formatCoordinates({ lat: location.latitude, lng: location.longitude })} · {location.city}
+              </span>
+              <span className="mt-1 block font-mono text-[0.76rem] text-cream-dim opacity-60 light:text-ink-dim light:opacity-100">
+                {pluralize(location.ratingsCount, "avaliação", "avaliações")} · {pluralize(location.photosCount, "foto", "fotos")}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 font-mono text-sm text-cream-dim max-md:hidden light:text-ink">
+              {location.avgRating.toFixed(1)}
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--sun-core)" strokeWidth={2} className="h-4 w-4">
+                <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
+              </svg>
+            </div>
+          </Link>
+          {showAds && isAdPosition(index + 1, locations.length) && (
+            <div className="py-2 empty:hidden">
+              <InFeedAd />
+            </div>
+          )}
+        </Fragment>
       ))}
     </div>
   );

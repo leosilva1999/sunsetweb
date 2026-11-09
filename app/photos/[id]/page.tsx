@@ -1,3 +1,4 @@
+import DisplayAd from "@/components/ads/DisplayAd";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -105,6 +106,8 @@ export default async function PhotoDetailPage({ params }: PageProps<"/photos/[id
           <Comments photoId={photo.id} initialPage={comments} />
         </div>
       </div>
+
+      <DisplayAd className="mt-14" />
     </div>
   );
 }

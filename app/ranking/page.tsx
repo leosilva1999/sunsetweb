@@ -60,7 +60,7 @@ export default async function RankingPage({ searchParams }: PageProps<"/ranking"
       ) : view === "cities" ? (
         <CityRankingList items={cities} />
       ) : (
-        <RankingList locations={locations} />
+        <RankingList locations={locations} showAds />
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import DisplayAd from "@/components/ads/DisplayAd";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -143,6 +144,8 @@ export default async function LocationDetailPage({ params }: PageProps<"/locatio
       ) : (
         <PhotoGrid items={photos.items} />
       )}
+
+      <DisplayAd className="mt-14" />
 
       <h2 className="mt-14 mb-6 font-display text-2xl font-semibold">Avaliações</h2>
       <LocationRatings locationId={id} initialPage={ratings} />
