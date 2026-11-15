@@ -13,6 +13,17 @@ export function getPhotos(sort: "recent" | "top" = "recent", cursor?: string, li
   return apiFetch<CursorPage<Photo>>(`/photos?${query}`, tagged("photos"));
 }
 
+// Aba "Seguindo": fotos de quem o usuário segue, mais recentes primeiro. Personalizada, então
+// nunca em cache: sempre buscada no navegador com o token (a API responde 401 sem login).
+export function getFollowingPhotos(token: string, cursor?: string, limit?: number) {
+  const query = new URLSearchParams({
+    ...(cursor ? { cursor } : {}),
+    ...(limit ? { limit: String(limit) } : {}),
+  });
+  const suffix = query.size > 0 ? `?${query}` : "";
+  return apiFetch<CursorPage<Photo>>(`/photos/following${suffix}`, { token });
+}
+
 export function getPhotoCount() {
   return apiFetch<{ count: number }>("/photos/count", tagged("photos"));
 }
